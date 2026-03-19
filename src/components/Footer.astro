@@ -1,0 +1,70 @@
+---
+const platform = [
+  'EA Trading System',
+  'Weekly Analysis',
+  'Education Hub',
+  'Events & Workshop',
+];
+
+const community = [
+  'Facebook Group',
+  'YouTube Channel',
+  'TikTok',
+  'Telegram',
+];
+---
+
+<!-- Gold separator -->
+<div class="h-px bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+
+<footer class="relative z-10 bg-ink px-6 md:px-16 py-16 md:py-20">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-14 md:gap-20 items-start">
+
+    <!-- Brand -->
+    <div>
+      <a href="#" class="font-serif text-[26px] font-bold tracking-widest text-gold no-underline block mb-4">
+        NEXT<span class="font-normal italic text-white">1</span>
+      </a>
+      <p class="text-[13px] text-white/40 leading-relaxed max-w-[260px]">
+        Hệ sinh thái đầu tư & trading dành cho nhà đầu tư Việt Nam.
+        Hiểu biết. Đầu tư. Thịnh vượng.
+      </p>
+      <p class="mt-4 text-[13px] text-white/30">📍 Hồ Chí Minh, Việt Nam</p>
+    </div>
+
+    <!-- Platform links -->
+    <div>
+      <h4 class="text-[10px] tracking-[0.3em] uppercase text-white/40 mb-5">Nền tảng</h4>
+      <ul class="flex flex-col gap-3 list-none">
+        {platform.map((item) => (
+          <li>
+            <a href="#" class="text-[14px] text-white/75 no-underline transition-colors duration-200 hover:text-gold">
+              {item}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Community links -->
+    <div>
+      <h4 class="text-[10px] tracking-[0.3em] uppercase text-white/40 mb-5">Cộng đồng</h4>
+      <ul class="flex flex-col gap-3 list-none">
+        {community.map((item) => (
+          <li>
+            <a href="#" class="text-[14px] text-white/75 no-underline transition-colors duration-200 hover:text-gold">
+              {item}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<!-- Footer bottom bar -->
+<div class="relative z-10 bg-ink border-t border-white/10 px-6 md:px-16 py-5
+            flex flex-col md:flex-row justify-between items-center gap-3">
+  <p class="text-[12px] text-white/40">© 2025 NEXT 1 — Barclay Club. All rights reserved.</p>
+  <p class="text-[12px] text-white/25">Đầu tư có rủi ro. Nội dung chỉ mang tính giáo dục.</p>
+</div>

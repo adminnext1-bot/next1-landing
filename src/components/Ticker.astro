@@ -1,0 +1,27 @@
+---
+const items = [
+  { symbol: 'XAUUSD',  price: '3,025.40', change: '+0.82%', up: true  },
+  { symbol: 'BTC/USD', price: '84,210',   change: '+1.45%', up: true  },
+  { symbol: 'EUR/USD', price: '1.0852',   change: '-0.23%', up: false },
+  { symbol: 'VN-Index',price: '1,285.6',  change: '+0.54%', up: true  },
+  { symbol: 'DXY',     price: '103.42',   change: '+0.18%', up: true  },
+  { symbol: 'WTI',     price: '71.85',    change: '-0.67%', up: false },
+  { symbol: 'ETH/USD', price: '2,185',    change: '+2.10%', up: true  },
+  { symbol: 'S&P500',  price: '5,620',    change: '+0.33%', up: true  },
+];
+
+// Duplicate for seamless loop
+const doubled = [...items, ...items];
+---
+
+<div class="relative z-10 bg-ink-2 border-y border-white/10 py-[13px] overflow-hidden">
+  <div class="flex gap-16 whitespace-nowrap animate-ticker w-max">
+    {doubled.map((item) => (
+      <div class="flex items-center gap-2.5 font-mono text-[12px] text-white/40">
+        <span class="text-white/80 font-medium">{item.symbol}</span>
+        {item.price}
+        <span class={item.up ? 'text-emerald-400' : 'text-red-400'}>{item.change}</span>
+      </div>
+    ))}
+  </div>
+</div>

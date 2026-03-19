@@ -1,0 +1,119 @@
+---
+const plans = [
+  {
+    name: 'Community — Free',
+    price: '0',
+    currency: '',
+    suffix: 'đ',
+    period: 'Miễn phí mãi mãi',
+    features: [
+      'Kiến thức tài chính cơ bản',
+      'Tham gia cộng đồng Facebook/Zalo',
+      'Weekly market summary',
+      '1 webinar/tháng mở',
+    ],
+    cta: 'Tham gia miễn phí',
+    featured: false,
+  },
+  {
+    name: 'Premium — Pro',
+    price: '499K',
+    currency: '₫',
+    suffix: '',
+    period: '/ tháng · thanh toán hàng quý',
+    features: [
+      'Tất cả quyền lợi Free',
+      'Weekly deep-dive analysis',
+      'Tín hiệu giao dịch (signals)',
+      'EA Trading access',
+      'Live Q&A hàng tuần',
+      'Nhóm Telegram private',
+    ],
+    cta: 'Đăng ký Premium',
+    featured: true,
+  },
+  {
+    name: 'Inner Circle — Elite',
+    price: '1.9M',
+    currency: '₫',
+    suffix: '',
+    period: '/ tháng · tối thiểu 3 tháng',
+    features: [
+      'Tất cả quyền lợi Premium',
+      '1-on-1 Mentorship (2x/tháng)',
+      'Capital strategy tư vấn riêng',
+      'Myfxbook track record live',
+      'Network với quỹ & investor',
+      'Early access sản phẩm mới',
+    ],
+    cta: 'Ứng tuyển Inner Circle',
+    featured: false,
+  },
+];
+---
+
+<section id="membership" class="relative z-10 bg-ink-2 border-b border-white/10 px-6 md:px-16 py-28 md:py-36">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="text-center mb-16 md:mb-20 reveal">
+      <span class="section-label text-center mb-4">// 03 — Membership</span>
+      <h2 class="section-title">
+        Chọn hành trình<br /><span class="text-gold italic font-normal">của bạn</span>
+      </h2>
+      <p class="mt-5 text-[15px] text-white/40 max-w-[400px] mx-auto leading-relaxed">
+        Từ nền tảng đến chiến lược chuyên sâu — mỗi cấp độ là một bước tiến trong hành trình tài chính của bạn.
+      </p>
+    </div>
+
+    <!-- Plans -->
+    <div class="grid md:grid-cols-3 gap-6">
+      {plans.map((plan, i) => (
+        <div
+          class={[
+            'relative flex flex-col p-10 transition-all duration-300 reveal',
+            plan.featured
+              ? 'border border-gold bg-gradient-to-b from-gold/[0.07] to-transparent'
+              : 'border border-white/10 bg-ink hover:border-white/25',
+          ].join(' ')}
+          style={`animation-delay: ${i * 0.1}s`}
+        >
+          {plan.featured && (
+            <span class="absolute -top-3 left-1/2 -translate-x-1/2
+                         bg-gold text-ink text-[9px] font-bold tracking-[0.22em] uppercase px-4 py-1">
+              RECOMMENDED
+            </span>
+          )}
+
+          <div class="font-mono text-[11px] tracking-[0.3em] uppercase text-gold mb-5">{plan.name}</div>
+
+          <div class="font-serif text-[50px] font-black leading-none text-white mb-2">
+            {plan.currency && <sup class="text-xl font-normal">{plan.currency}</sup>}{plan.price}{plan.suffix && <sup class="text-xl font-normal">{plan.suffix}</sup>}
+          </div>
+          <div class="text-[13px] text-white/40 mb-9">{plan.period}</div>
+
+          <ul class="flex flex-col gap-3.5 mb-10 flex-1">
+            {plan.features.map((f) => (
+              <li class="flex items-start gap-3 text-[14px] text-white/80 leading-snug">
+                <span class="text-gold text-[8px] mt-1.5 flex-shrink-0">◆</span>
+                {f}
+              </li>
+            ))}
+          </ul>
+
+          <a
+            href="#"
+            class={[
+              'block w-full py-3.5 text-center text-[12px] font-semibold tracking-[0.15em] uppercase no-underline transition-all duration-250',
+              plan.featured
+                ? 'bg-gold text-ink hover:bg-gold-light'
+                : 'border border-white/30 text-white/70 hover:border-gold hover:text-gold',
+            ].join(' ')}
+          >
+            {plan.cta}
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

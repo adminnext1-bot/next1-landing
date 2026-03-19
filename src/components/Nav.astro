@@ -1,0 +1,81 @@
+---
+const links = [
+  { label: 'Về chúng tôi', href: '#about' },
+  { label: 'Dịch vụ',      href: '#pillars' },
+  { label: 'Membership',   href: '#membership' },
+  { label: 'Liên hệ',      href: '#contact' },
+];
+---
+
+<nav
+  id="main-nav"
+  class="fixed top-0 inset-x-0 z-50 flex items-center justify-between
+         px-6 md:px-14 py-4 md:py-5
+         border-b border-white/10 bg-ink/85 backdrop-blur-xl
+         transition-shadow duration-300"
+>
+  <!-- Logo -->
+  <a href="#" class="font-serif text-xl font-bold tracking-widest text-gold no-underline">
+    NEXT<span class="font-normal italic text-white">1</span>
+  </a>
+
+  <!-- Desktop nav links -->
+  <ul class="hidden md:flex gap-10 list-none">
+    {links.map((l) => (
+      <li>
+        <a
+          href={l.href}
+          class="text-[13px] font-normal tracking-[0.12em] uppercase text-white/80
+                 no-underline transition-colors duration-200 hover:text-gold"
+        >
+          {l.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <!-- Desktop CTA -->
+  <a
+    href="#membership"
+    class="hidden md:inline-block px-7 py-2.5
+           border border-gold text-gold text-[12px] font-medium tracking-[0.12em] uppercase
+           no-underline transition-all duration-200
+           hover:bg-gold hover:text-ink"
+  >
+    Tham gia ngay
+  </a>
+
+  <!-- Hamburger -->
+  <button
+    id="menu-toggle"
+    class="md:hidden flex flex-col gap-[5px] p-1 group"
+    aria-label="Toggle menu"
+  >
+    <span class="block w-6 h-px bg-white/70 group-hover:bg-gold transition-colors"></span>
+    <span class="block w-4 h-px bg-white/70 group-hover:bg-gold transition-colors"></span>
+    <span class="block w-6 h-px bg-white/70 group-hover:bg-gold transition-colors"></span>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div
+  id="mobile-menu"
+  class="hidden fixed inset-0 z-40 bg-ink/97 backdrop-blur-2xl flex-col
+         items-center justify-center gap-8 pt-20"
+>
+  {links.map((l) => (
+    <a
+      href={l.href}
+      class="font-serif text-3xl text-white/80 hover:text-gold transition-colors no-underline tracking-wide"
+    >
+      {l.label}
+    </a>
+  ))}
+  <a
+    href="#membership"
+    class="mt-4 px-10 py-4 border border-gold text-gold text-sm font-medium
+           tracking-[0.15em] uppercase no-underline hover:bg-gold hover:text-ink transition-all"
+  >
+    Tham gia ngay
+  </a>
+</div>

@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --gold:      #C9A84C;
+    --gold-light:#E8CC7A;
+    --gold-dark: #9B7A2A;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply bg-ink text-white font-sans font-light overflow-x-hidden;
+    cursor: default;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  ::selection   { @apply bg-gold text-ink; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { @apply bg-ink; }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+}
+
+@layer components {
+  .section-label {
+    @apply font-mono text-[10px] tracking-[0.4em] uppercase text-gold block;
+  }
+
+  .section-title {
+    @apply font-serif text-[clamp(36px,5vw,64px)] font-bold leading-[1.05] tracking-tight;
+  }
+
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    border: none;
+    margin: 0;
+  }
+
+  /* Reveal animation class added by JS */
+  .reveal {
+    @apply opacity-0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    @apply opacity-100;
+    transform: translateY(0);
+  }
+}

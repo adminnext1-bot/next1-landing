@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Ticker from '../components/Ticker.astro';
+import About from '../components/About.astro';
+import Pillars from '../components/Pillars.astro';
+import Membership from '../components/Membership.astro';
+import Manifesto from '../components/Manifesto.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+---
+
+<Layout>
+  <Nav />
+  <main class="pt-[72px]">
+    <Hero />
+    <Ticker />
+    <About />
+    <hr class="gold-rule" />
+    <Pillars />
+    <hr class="gold-rule" />
+    <Membership />
+    <Manifesto />
+    <Footer />
+  </main>
+</Layout>

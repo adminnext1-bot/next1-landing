@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXT 1 – Hiểu Biết. Đầu Tư. Thịnh Vượng.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8CC7A;
+    --gold-dark: #9B7A2A;
+    --gold-pale: rgba(201,168,76,0.08);
+    --black: #080808;
+    --black-2: #111111;
+    --black-3: #1A1A1A;
+    --white: #FFFFFF;
+    --white-80: rgba(255,255,255,0.80);
+    --white-40: rgba(255,255,255,0.40);
+    --white-10: rgba(255,255,255,0.10);
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--sans);
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+
+  /* ── SELECTION ── */
+  ::selection { background: var(--gold); color: var(--black); }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 20px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--white-10);
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+  }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .nav-logo span {
+    color: var(--white);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .nav-links {
+    display: flex; gap: 40px; list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white-80);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-cta {
+    padding: 10px 28px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .nav-cta:hover {
+    background: var(--gold);
+    color: var(--black);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 0 60px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.07) 0%, transparent 70%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.06) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black, transparent);
+  }
+
+  .hero-eyebrow {
+    position: relative; z-index: 1;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '──';
+    margin: 0 14px;
+    color: var(--gold-dark);
+  }
+
+  .hero-title {
+    position: relative; z-index: 1;
+    font-family: var(--serif);
+    font-size: clamp(52px, 8vw, 108px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+  }
+
+  .hero-title .word-gold { color: var(--gold); }
+  .hero-title .word-italic { font-style: italic; font-weight: 400; }
+
+  .hero-subtitle {
+    position: relative; z-index: 1;
+    margin-top: 36px;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--white-80);
+    max-width: 560px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+
+  .hero-actions {
+    position: relative; z-index: 1;
+    margin-top: 52px;
+    display: flex; gap: 20px; align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s forwards;
+  }
+
+  .btn-primary {
+    padding: 16px 44px;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: none; cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 60px rgba(201,168,76,0.3);
+  }
+
+  .btn-ghost {
+    padding: 16px 44px;
+    border: 1px solid var(--white-40);
+    color: var(--white-80);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .hero-stats {
+    position: absolute; bottom: 60px; left: 60px; right: 60px; z-index: 1;
+    display: flex; justify-content: center; gap: 80px;
+    opacity: 0;
+    animation: fadeUp 0.9s 1.0s forwards;
+  }
+
+  .stat-item { text-align: center; }
+
+  .stat-number {
+    font-family: var(--serif);
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white-40);
+    margin-top: 8px;
+    display: block;
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 50px;
+    background: var(--white-10);
+    align-self: center;
+  }
+
+  /* ── TICKER ── */
+  .ticker {
+    background: var(--black-2);
+    border-top: 1px solid var(--white-10);
+    border-bottom: 1px solid var(--white-10);
+    padding: 14px 0;
+    overflow: hidden;
+    position: relative; z-index: 2;
+  }
+
+  .ticker-track {
+    display: flex; gap: 60px;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+  }
+
+  .ticker-item {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white-40);
+  }
+
+  .ticker-item .symbol { color: var(--white-80); font-weight: 500; }
+  .ticker-item .up { color: #4CAF50; }
+  .ticker-item .down { color: #F44336; }
+
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ── SECTION COMMON ── */
+  section { position: relative; z-index: 1; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── ABOUT / VISION ── */
+  .about {
+    padding: 140px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: center;
+    border-bottom: 1px solid var(--white-10);
+  }
+
+  .about-content {}
+
+  .about-text {
+    margin-top: 32px;
+    font-size: 17px;
+    line-height: 1.85;
+    color: var(--white-80);
+    font-weight: 300;
+  }
+
+  .about-quote {
+    margin-top: 40px;
+    padding: 28px 32px;
+    border-left: 3px solid var(--gold);
+    background: var(--gold-pale);
+  }
+
+  .about-quote p {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-style: italic;
+    color: var(--white-80);
+    line-height: 1.6;
+  }
+
+  .about-visual {
+    position: relative;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .value-card {
+    padding: 36px 28px;
+    background: var(--black-2);
+    border: 1px solid var(--white-10);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .value-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .value-card:hover { border-color: var(--gold); }
+  .value-card:hover::before { transform: scaleX(1); }
+
+  .value-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .value-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .value-desc {
+    font-size: 13px;
+    color: var(--white-40);
+    line-height: 1.6;
+  }
+
+  /* ── PILLARS ── */
+  .pillars {
+    padding: 140px 60px;
+    border-bottom: 1px solid var(--white-10);
+  }
+
+  .pillars-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 80px;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--white-10);
+  }
+
+  .pillar-card {
+    padding: 52px 40px;
+    background: var(--black);
+    position: relative;
+    transition: background 0.3s ease;
+    overflow: hidden;
+  }
+
+  .pillar-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 40px; right: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+  }
+
+  .pillar-card:hover { background: var(--black-2); }
+  .pillar-card:hover::after { transform: scaleX(1); }
+
+  .pillar-num {
+    font-family: var(--serif);
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 0.85;
+    color: rgba(201,168,76,0.12);
+    margin-bottom: 28px;
+    display: block;
+    transition: color 0.3s;
+  }
+
+  .pillar-card:hover .pillar-num { color: rgba(201,168,76,0.22); }
+
+  .pillar-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+
+  .pillar-title span { color: var(--gold); }
+
+  .pillar-desc {
+    font-size: 14px;
+    color: var(--white-40);
+    line-height: 1.7;
+  }
+
+  /* ── MEMBERSHIP ── */
+  .membership {
+    padding: 140px 60px;
+    background: var(--black-2);
+    border-bottom: 1px solid var(--white-10);
+  }
+
+  .membership-header { text-align: center; margin-bottom: 80px; }
+  .membership-header .section-label { display: block; text-align: center; }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .plan-card {
+    padding: 48px 36px;
+    border: 1px solid var(--white-10);
+    background: var(--black);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .plan-card.featured {
+    border-color: var(--gold);
+    background: linear-gradient(160deg, rgba(201,168,76,0.06), transparent);
+  }
+
+  .plan-card.featured::before {
+    content: 'RECOMMENDED';
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--black);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    padding: 4px 14px;
+  }
+
+  .plan-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .plan-price {
+    font-family: var(--serif);
+    font-size: 52px;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .plan-price sup { font-size: 20px; font-weight: 400; }
+  .plan-period { font-size: 13px; color: var(--white-40); margin-bottom: 36px; }
+
+  .plan-features {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 14px;
+    margin-bottom: 40px;
+  }
+
+  .plan-features li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 14px; color: var(--white-80); line-height: 1.5;
+  }
+
+  .plan-features li::before {
+    content: '◆';
+    color: var(--gold);
+    font-size: 8px;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .plan-btn {
+    width: 100%;
+    padding: 14px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--white-40);
+    color: var(--white-80);
+    transition: all 0.25s;
+    display: block;
+  }
+
+  .plan-card.featured .plan-btn {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--black);
+  }
+
+  .plan-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .plan-card.featured .plan-btn:hover { background: var(--gold-light); }
+
+  /* ── MANIFESTO / CTA ── */
+  .manifesto {
+    padding: 160px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .manifesto::before {
+    content: 'NEXT 1';
+    position: absolute;
+    font-family: var(--serif);
+    font-size: 320px;
+    font-weight: 900;
+    color: rgba(201,168,76,0.03);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -0.05em;
+  }
+
+  .manifesto .section-label { margin: 0 auto 20px; display: block; text-align: center; }
+
+  .manifesto-title {
+    font-family: var(--serif);
+    font-size: clamp(40px, 7vw, 88px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    max-width: 800px;
+    margin: 0 auto 32px;
+  }
+
+  .manifesto-title .italic { font-style: italic; color: var(--gold); font-weight: 400; }
+
+  .manifesto-sub {
+    font-size: 18px;
+    color: var(--white-80);
+    max-width: 500px;
+    margin: 0 auto 60px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 60px;
+    border-top: 1px solid var(--white-10);
+    background: var(--black);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .footer-brand .nav-logo { font-size: 26px; margin-bottom: 16px; display: block; }
+
+  .footer-brand p {
+    font-size: 13px;
+    color: var(--white-40);
+    line-height: 1.7;
+    max-width: 260px;
+  }
+
+  .footer-links h4 {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--white-40);
+    margin-bottom: 20px;
+  }
+
+  .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+
+  .footer-links a {
+    font-size: 14px;
+    color: var(--white-80);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-bottom {
+    padding: 24px 60px;
+    border-top: 1px solid var(--white-10);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .footer-bottom p { font-size: 12px; color: var(--white-40); }
+
+  .footer-gold-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin-bottom: 0;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── DIVIDER ── */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0;
+    border: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 18px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 0 24px; }
+    .hero-stats { gap: 30px; left: 24px; right: 24px; }
+    .about, .pillars, .membership, .manifesto { padding: 80px 24px; }
+    .about { grid-template-columns: 1fr; gap: 60px; }
+    .pillars-grid, .plans-grid { grid-template-columns: 1fr; }
+    .pillar-card { padding: 40px 28px; }
+    footer { grid-template-columns: 1fr; padding: 60px 24px; }
+    .footer-bottom { flex-direction: column; gap: 12px; padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="#" class="nav-logo">NEXT<span>1</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">Về chúng tôi</a></li>
+    <li><a href="#pillars">Dịch vụ</a></li>
+    <li><a href="#membership">Membership</a></li>
+    <li><a href="#contact">Liên hệ</a></li>
+  </ul>
+  <a href="#membership" class="nav-cta">Tham gia ngay</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <span class="hero-eyebrow">Community · Vietnam · Southeast Asia</span>
+
+  <h1 class="hero-title">
+    Hiểu <span class="word-italic">Biết.</span><br>
+    Đầu <span class="word-gold">Tư.</span><br>
+    <span class="word-italic">Thịnh</span> Vượng.
+  </h1>
+
+  <p class="hero-subtitle">
+    Hệ sinh thái đầu tư & trading dành cho thế hệ nhà đầu tư Việt Nam mới —
+    kỷ luật, có hệ thống, không cảm xúc.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#membership" class="btn-primary">Gia nhập cộng đồng</a>
+    <a href="#about" class="btn-ghost">Tìm hiểu thêm</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-number">500+</span>
+      <span class="stat-label">Thành viên</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">6</span>
+      <span class="stat-label">Thị trường</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">3</span>
+      <span class="stat-label">Năm kinh nghiệm</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">0</span>
+      <span class="stat-label">Cam kết "lùa gà"</span>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <!-- first set -->
+    <div class="ticker-item"><span class="symbol">XAUUSD</span> 3,025.40 <span class="up">+0.82%</span></div>
+    <div class="ticker-item"><span class="symbol">BTC/USD</span> 84,210 <span class="up">+1.45%</span></div>
+    <div class="ticker-item"><span class="symbol">EUR/USD</span> 1.0852 <span class="down">-0.23%</span></div>
+    <div class="ticker-item"><span class="symbol">VN-Index</span> 1,285.6 <span class="up">+0.54%</span></div>
+    <div class="ticker-item"><span class="symbol">DXY</span> 103.42 <span class="up">+0.18%</span></div>
+    <div class="ticker-item"><span class="symbol">WTI</span> 71.85 <span class="down">-0.67%</span></div>
+    <div class="ticker-item"><span class="symbol">ETH/USD</span> 2,185 <span class="up">+2.10%</span></div>
+    <div class="ticker-item"><span class="symbol">S&P500</span> 5,620 <span class="up">+0.33%</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="ticker-item"><span class="symbol">XAUUSD</span> 3,025.40 <span class="up">+0.82%</span></div>
+    <div class="ticker-item"><span class="symbol">BTC/USD</span> 84,210 <span class="up">+1.45%</span></div>
+    <div class="ticker-item"><span class="symbol">EUR/USD</span> 1.0852 <span class="down">-0.23%</span></div>
+    <div class="ticker-item"><span class="symbol">VN-Index</span> 1,285.6 <span class="up">+0.54%</span></div>
+    <div class="ticker-item"><span class="symbol">DXY</span> 103.42 <span class="up">+0.18%</span></div>
+    <div class="ticker-item"><span class="symbol">WTI</span> 71.85 <span class="down">-0.67%</span></div>
+    <div class="ticker-item"><span class="symbol">ETH/USD</span> 2,185 <span class="up">+2.10%</span></div>
+    <div class="ticker-item"><span class="symbol">S&P500</span> 5,620 <span class="up">+0.33%</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-content">
+    <span class="section-label">// 01 — Về chúng tôi</span>
+    <h2 class="section-title">Không chỉ là<br>nơi để <span style="color:var(--gold);font-style:italic">trade.</span></h2>
+    <p class="about-text">
+      NEXT 1 là hệ sinh thái tài chính dành cho nhà đầu tư Việt Nam — nơi bạn không chỉ học kỹ thuật, mà xây dựng tư duy, kỷ luật và hệ thống bền vững.
+      <br><br>
+      Chúng tôi tin rằng sự thịnh vượng thực sự bắt đầu từ hiểu biết, không phải may mắn.
+    </p>
+    <blockquote class="about-quote">
+      <p>"Thị trường không thưởng người thông minh nhất — nó thưởng người kỷ luật nhất."</p>
+    </blockquote>
+  </div>
+
+  <div class="about-visual">
+    <div class="values-grid">
+      <div class="value-card">
+        <span class="value-icon">◈</span>
+        <div class="value-title">Minh bạch</div>
+        <p class="value-desc">Public track record. Không giấu thua. Không tô hồng lãi.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">⬡</span>
+        <div class="value-title">Hệ thống</div>
+        <p class="value-desc">Framework rõ ràng. Không giao dịch theo cảm xúc hay FOMO.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">◎</span>
+        <div class="value-title">Cộng đồng</div>
+        <p class="value-desc">Không ai đi một mình. Học cùng nhau, chịu trách nhiệm cùng nhau.</p>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">◆</span>
+        <div class="value-title">Đạo đức</div>
+        <p class="value-desc">Không "lùa gà". Không bán giấc mơ. Không FOMO marketing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-rule">
+
+<!-- PILLARS -->
+<section class="pillars" id="pillars">
+  <div class="pillars-header">
+    <div>
+      <span class="section-label">// 02 — Dịch vụ</span>
+      <h2 class="section-title">6 Trụ cột<br><span style="color:var(--gold);font-style:italic">hoạt động</span></h2>
+    </div>
+    <p style="font-size:14px; color:var(--white-40); max-width:280px; text-align:right; line-height:1.7;">
+      Từ tự động hoá đến giáo dục, từ phân tích đến xây dựng đội nhóm.
+    </p>
+  </div>
+
+  <div class="pillars-grid">
+    <div class="pillar-card">
+      <span class="pillar-num">01</span>
+      <div class="pillar-title"><span>EA Trading</span></div>
+      <p class="pillar-desc">Hệ thống giao dịch tự động với quản lý vốn chặt chẽ. Lợi nhuận ổn định, không "all-in gamble".</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">02</span>
+      <div class="pillar-title"><span>Weekly</span> Analysis</div>
+      <p class="pillar-desc">Phân tích thị trường chuyên sâu hàng tuần. Bias rõ ràng cho mọi trader. Tránh giao dịch cảm tính.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">03</span>
+      <div class="pillar-title"><span>Education</span> System</div>
+      <p class="pillar-desc">Nội dung chất lượng trên Facebook, YouTube, TikTok. Từ cơ bản đến nâng cao theo lộ trình rõ ràng.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">04</span>
+      <div class="pillar-title"><span>Training</span> & Team</div>
+      <p class="pillar-desc">Đào tạo trader mới. Hướng dẫn xây dựng đội nhóm. Phát triển kỹ năng lãnh đạo và hệ thống.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">05</span>
+      <div class="pillar-title"><span>Strategic</span> Partnerships</div>
+      <p class="pillar-desc">Kết nối với broker và nền tảng uy tín dựa trên kinh nghiệm thực tế. Giảm rủi ro cho người mới.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">06</span>
+      <div class="pillar-title"><span>Events</span> & Engagement</div>
+      <p class="pillar-desc">Workshop, Webinar, Seminar offline. Biến kiến thức thành trải nghiệm thực tế, không chỉ lý thuyết.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-rule">
+
+<!-- MEMBERSHIP -->
+<section class="membership" id="membership">
+  <div class="membership-header">
+    <span class="section-label">// 03 — Membership</span>
+    <h2 class="section-title" style="font-size: clamp(36px,5vw,64px);">Chọn hành trình<br><span style="color:var(--gold);font-style:italic">của bạn</span></h2>
+    <p style="margin-top:16px; font-size:15px; color:var(--white-40); max-width:420px; margin-left:auto; margin-right:auto; line-height:1.7;">
+      Từ nền tảng đến chiến lược chuyên sâu — mỗi cấp độ là một bước tiến trong hành trình tài chính của bạn.
+    </p>
+  </div>
+
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div class="plan-name">Community — Free</div>
+      <div class="plan-price">0<sup>đ</sup></div>
+      <div class="plan-period">Miễn phí mãi mãi</div>
+      <ul class="plan-features">
+        <li>Kiến thức tài chính cơ bản</li>
+        <li>Tham gia cộng đồng Facebook/Zalo</li>
+        <li>Weekly market summary</li>
+        <li>1 webinar/tháng mở</li>
+      </ul>
+      <a href="#" class="plan-btn">Tham gia miễn phí</a>
+    </div>
+
+    <div class="plan-card featured">
+      <div class="plan-name">Premium — Pro</div>
+      <div class="plan-price"><sup>₫</sup>499K</div>
+      <div class="plan-period">/ tháng · thanh toán hàng quý</div>
+      <ul class="plan-features">
+        <li>Tất cả quyền lợi Free</li>
+        <li>Weekly deep-dive analysis</li>
+        <li>Tín hiệu giao dịch (signals)</li>
+        <li>EA Trading access</li>
+        <li>Live Q&A hàng tuần</li>
+        <li>Nhóm Telegram private</li>
+      </ul>
+      <a href="#" class="plan-btn">Đăng ký Premium</a>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name">Inner Circle — Elite</div>
+      <div class="plan-price"><sup>₫</sup>1.9M</div>
+      <div class="plan-period">/ tháng · tối thiểu 3 tháng</div>
+      <ul class="plan-features">
+        <li>Tất cả quyền lợi Premium</li>
+        <li>1-on-1 Mentorship (2x/tháng)</li>
+        <li>Capital strategy tư vấn riêng</li>
+        <li>Myfxbook track record live</li>
+        <li>Network với quỹ & investor</li>
+        <li>Early access sản phẩm mới</li>
+      </ul>
+      <a href="#" class="plan-btn">Ứng tuyển Inner Circle</a>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO / CTA -->
+<section class="manifesto" id="contact">
+  <span class="section-label">// Sẵn sàng chưa?</span>
+  <h2 class="manifesto-title">
+    Xây dựng tài sản<br>
+    <span class="italic">không phải cảm xúc.</span>
+  </h2>
+  <p class="manifesto-sub">
+    Một cộng đồng mạnh không phải vì giỏi nhất — mà vì kỷ luật nhất. Bước tiếp theo là của bạn.
+  </p>
+  <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+    <a href="#membership" class="btn-primary">Tham gia NEXT 1 ngay</a>
+    <a href="mailto:next1community@gmail.com" class="btn-ghost">Liên hệ chúng tôi</a>
+  </div>
+</section>
+
+<div class="footer-gold-line"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <a href="#" class="nav-logo">NEXT<span>1</span></a>
+    <p>Hệ sinh thái đầu tư & trading dành cho nhà đầu tư Việt Nam. Hiểu biết. Đầu tư. Thịnh vượng.</p>
+    <p style="margin-top:16px;">📍 Hồ Chí Minh, Việt Nam</p>
+  </div>
+
+  <div class="footer-links">
+    <h4>Nền tảng</h4>
+    <ul>
+      <li><a href="#">EA Trading System</a></li>
+      <li><a href="#">Weekly Analysis</a></li>
+      <li><a href="#">Education Hub</a></li>
+      <li><a href="#">Events & Workshop</a></li>
+    </ul>
+  </div>
+
+  <div class="footer-links">
+    <h4>Cộng đồng</h4>
+    <ul>
+      <li><a href="#">Facebook Group</a></li>
+      <li><a href="#">YouTube Channel</a></li>
+      <li><a href="#">TikTok</a></li>
+      <li><a href="#">Telegram</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="footer-bottom">
+  <p>© 2025 NEXT 1 — Barclay Club. All rights reserved.</p>
+  <p style="color:var(--white-40);">Đầu tư có rủi ro. Nội dung chỉ mang tính giáo dục.</p>
+</div>
+
+</body>
+</html>
