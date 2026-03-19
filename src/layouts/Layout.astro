@@ -49,16 +49,35 @@ const {
         nav?.classList.toggle('shadow-[0_4px_40px_rgba(0,0,0,0.6)]', window.scrollY > 20);
       });
 
-      // Mobile menu toggle
+      // Mobile menu
       const toggle = document.getElementById('menu-toggle');
       const mobileMenu = document.getElementById('mobile-menu');
+      const barTop = document.getElementById('bar-top');
+      const barMid = document.getElementById('bar-mid');
+      const barBot = document.getElementById('bar-bot');
+
+      function openMenu() {
+        mobileMenu?.classList.add('is-open');
+        toggle?.setAttribute('aria-expanded', 'true');
+        barTop?.classList.add('rotate-45', 'translate-y-[6px]', '!bg-gold');
+        barMid?.classList.add('opacity-0');
+        barBot?.classList.add('-rotate-45', '-translate-y-[6px]', '!bg-gold');
+      }
+
+      function closeMenu() {
+        mobileMenu?.classList.remove('is-open');
+        toggle?.setAttribute('aria-expanded', 'false');
+        barTop?.classList.remove('rotate-45', 'translate-y-[6px]', '!bg-gold');
+        barMid?.classList.remove('opacity-0');
+        barBot?.classList.remove('-rotate-45', '-translate-y-[6px]', '!bg-gold');
+      }
+
       toggle?.addEventListener('click', () => {
-        mobileMenu?.classList.toggle('hidden');
+        mobileMenu?.classList.contains('is-open') ? closeMenu() : openMenu();
       });
 
-      // Close mobile menu on link click
       mobileMenu?.querySelectorAll('a').forEach((a) => {
-        a.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        a.addEventListener('click', closeMenu);
       });
     </script>
   </body>

@@ -1,27 +1,108 @@
 ---
 const items = [
-  { symbol: 'XAUUSD',  price: '3,025.40', change: '+0.82%', up: true  },
-  { symbol: 'BTC/USD', price: '84,210',   change: '+1.45%', up: true  },
-  { symbol: 'EUR/USD', price: '1.0852',   change: '-0.23%', up: false },
-  { symbol: 'VN-Index',price: '1,285.6',  change: '+0.54%', up: true  },
-  { symbol: 'DXY',     price: '103.42',   change: '+0.18%', up: true  },
-  { symbol: 'WTI',     price: '71.85',    change: '-0.67%', up: false },
-  { symbol: 'ETH/USD', price: '2,185',    change: '+2.10%', up: true  },
-  { symbol: 'S&P500',  price: '5,620',    change: '+0.33%', up: true  },
+  { symbol: 'XAUUSD',  key: 'xauusd',  price: '—', change: '—', up: true  },
+  { symbol: 'BTC/USD', key: 'btcusd',  price: '—', change: '—', up: true  },
+  { symbol: 'EUR/USD', key: 'eurusd',  price: '—', change: '—', up: false },
+  { symbol: 'VN-Index',key: 'vnindex', price: '—', change: '—', up: true  },
+  { symbol: 'DXY',     key: 'dxy',     price: '—', change: '—', up: true  },
+  { symbol: 'WTI',     key: 'wti',     price: '—', change: '—', up: false },
+  { symbol: 'ETH/USD', key: 'ethusd',  price: '—', change: '—', up: true  },
+  { symbol: 'S&P 500', key: 'sp500',   price: '—', change: '—', up: true  },
 ];
 
-// Duplicate for seamless loop
 const doubled = [...items, ...items];
 ---
 
 <div class="relative z-10 bg-ink-2 border-y border-white/10 py-[13px] overflow-hidden">
-  <div class="flex gap-16 whitespace-nowrap animate-ticker w-max">
+  <div id="ticker-track" class="flex gap-16 whitespace-nowrap animate-ticker w-max">
     {doubled.map((item) => (
-      <div class="flex items-center gap-2.5 font-mono text-[12px] text-white/40">
+      <div class="flex items-center gap-2.5 font-mono text-[12px] text-white/40" data-ticker={item.key}>
         <span class="text-white/80 font-medium">{item.symbol}</span>
-        {item.price}
-        <span class={item.up ? 'text-emerald-400' : 'text-red-400'}>{item.change}</span>
+        <span class="ticker-price">{item.price}</span>
+        <span class={`ticker-change ${item.up ? 'text-emerald-400' : 'text-red-400'}`}>{item.change}</span>
       </div>
     ))}
   </div>
 </div>
+
+<script>
+  // ── helpers ──────────────────────────────────────────────────────────
+  const DECIMALS: Record<string, number> = {
+    eurusd: 4, xauusd: 2, dxy: 2, wti: 2, vnindex: 1, sp500: 0, btcusd: 0, ethusd: 0,
+  };
+
+  function fmt(value: number, key: string): string {
+    const d = DECIMALS[key] ?? 2;
+    return value.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function updateTicker(key: string, price: string, change: string, up: boolean) {
+    document.querySelectorAll<HTMLElement>(`[data-ticker="${key}"]`).forEach((el) => {
+      const priceEl  = el.querySelector('.ticker-price');
+      const changeEl = el.querySelector('.ticker-change');
+      if (priceEl)  priceEl.textContent  = price;
+      if (changeEl) {
+        changeEl.textContent  = change;
+        changeEl.className    = `ticker-change ${up ? 'text-emerald-400' : 'text-red-400'}`;
+      }
+    });
+  }
+
+  // ── Binance WebSocket — BTC + ETH (real-time, no key needed) ─────────
+  function connectBinance() {
+    const ws = new WebSocket(
+      'wss://stream.binance.com:9443/stream?streams=btcusdt@miniTicker/ethusdt@miniTicker'
+    );
+
+    ws.onmessage = (e) => {
+      const { stream, data } = JSON.parse(e.data);
+      const key   = stream.startsWith('btc') ? 'btcusd' : 'ethusd';
+      const price = parseFloat(data.c);
+      const open  = parseFloat(data.o);
+      const pct   = ((price - open) / open) * 100;
+      const up    = pct >= 0;
+      updateTicker(key, fmt(price, key), `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
+    };
+
+    ws.onclose = () => setTimeout(connectBinance, 5000);
+    ws.onerror = () => ws.close();
+  }
+
+  // ── Yahoo Finance — gold, forex, indices, oil (poll every 60s) ───────
+  const YAHOO_MAP: Record<string, string> = {
+    'GC=F':      'xauusd',
+    'EURUSD=X':  'eurusd',
+    'DX-Y.NYB':  'dxy',
+    'CL=F':      'wti',
+    '^GSPC':     'sp500',
+    '^VNINDEX':  'vnindex',
+  };
+
+  async function fetchYahoo() {
+    const symbols = Object.keys(YAHOO_MAP).map(encodeURIComponent).join('%2C');
+    try {
+      const res  = await fetch(
+        `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`,
+        { headers: { Accept: 'application/json' } }
+      );
+      const json = await res.json();
+      const quotes: any[] = json?.quoteResponse?.result ?? [];
+
+      quotes.forEach((q) => {
+        const key = YAHOO_MAP[q.symbol];
+        if (!key) return;
+        const price = q.regularMarketPrice as number;
+        const pct   = q.regularMarketChangePercent as number;
+        const up    = pct >= 0;
+        updateTicker(key, fmt(price, key), `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
+      });
+    } catch {
+      // silent — keep showing last value
+    }
+  }
+
+  // ── boot ─────────────────────────────────────────────────────────────
+  connectBinance();
+  fetchYahoo();
+  setInterval(fetchYahoo, 60_000);
+</script>

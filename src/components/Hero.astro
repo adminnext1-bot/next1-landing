@@ -7,7 +7,7 @@ const stats = [
 ];
 ---
 
-<section class="relative min-h-screen flex flex-col items-center justify-center px-6 md:px-16 text-center overflow-hidden">
+<section class="relative min-h-screen flex flex-col items-center px-6 md:px-16 pt-24 md:pt-28 pb-10 text-center overflow-hidden">
 
   <!-- Radial glow -->
   <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(201,168,76,0.08),transparent_70%)] pointer-events-none"></div>
@@ -24,70 +24,77 @@ const stats = [
     "
   ></div>
 
-  <!-- Eyebrow -->
-  <span
-    class="relative z-10 font-mono text-[11px] tracking-[0.35em] uppercase text-gold mb-7
-           opacity-0 animate-[fadeUp_0.8s_0.2s_ease_forwards]"
-  >
-    <span class="text-gold-dark mx-3">──</span>Community · Vietnam · Southeast Asia<span class="text-gold-dark mx-3">──</span>
-  </span>
+  <!-- Main content -->
+  <div class="relative z-10 flex-1 flex flex-col items-center w-full max-w-[920px] mx-auto">
 
-  <!-- Headline -->
-  <h1
-    class="relative z-10 font-serif font-black leading-[0.92] tracking-tight
-           text-[clamp(52px,8.5vw,110px)] max-w-[920px]
-           opacity-0 animate-[fadeUp_0.9s_0.4s_ease_forwards]"
-  >
-    Hiểu <span class="italic font-normal">Biết.</span><br />
-    Đầu <span class="text-gold">Tư.</span><br />
-    <span class="italic font-normal">Thịnh</span> Vượng.
-  </h1>
-
-  <!-- Sub -->
-  <p
-    class="relative z-10 mt-9 text-[17px] md:text-lg font-light text-white/75 max-w-[540px] leading-relaxed
-           opacity-0 animate-[fadeUp_0.9s_0.6s_ease_forwards]"
-  >
-    Hệ sinh thái đầu tư & trading dành cho thế hệ nhà đầu tư Việt Nam mới —
-    kỷ luật, có hệ thống, không cảm xúc.
-  </p>
-
-  <!-- CTA row -->
-  <div
-    class="relative z-10 mt-12 flex flex-wrap gap-4 items-center justify-center
-           opacity-0 animate-[fadeUp_0.9s_0.8s_ease_forwards]"
-  >
-    <a
-      href="#membership"
-      class="px-10 py-4 bg-gold text-ink text-[13px] font-semibold tracking-[0.12em] uppercase
-             no-underline transition-all duration-250
-             hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(201,168,76,0.35)]"
+    <!-- Eyebrow -->
+    <span
+      class="font-mono text-[11px] tracking-[0.35em] uppercase text-gold mb-6
+             opacity-0 animate-[fadeUp_0.8s_0.2s_ease_forwards]
+             [animation-fill-mode:both] inline-flex items-center gap-2"
     >
-      Gia nhập cộng đồng
-    </a>
-    <a
-      href="#about"
-      class="px-10 py-4 border border-white/40 text-white/80 text-[13px] font-normal tracking-[0.12em] uppercase
-             no-underline transition-all duration-250 hover:border-gold hover:text-gold"
+      <span class="text-gold-dark mx-2 md:mx-3">──</span>Community · Vietnam · Southeast Asia<span class="text-gold-dark mx-2 md:mx-3">──</span>
+    </span>
+
+    <!-- Headline -->
+    <h1
+      class="font-serif font-black leading-[0.92] tracking-tight
+             text-[clamp(44px,8.5vw,110px)]
+             opacity-0 animate-[fadeUp_0.9s_0.4s_ease_forwards]"
     >
-      Tìm hiểu thêm
-    </a>
+      Hiểu <span class="italic font-normal">Biết.</span><br />
+      Đầu <span class="text-gold">Tư.</span><br />
+      <span class="italic font-normal">Thịnh</span> Vượng.
+    </h1>
+
+    <!-- Sub -->
+    <p
+      class="mt-7 text-base md:text-lg font-light text-white/75 max-w-[540px] leading-relaxed
+             opacity-0 animate-[fadeUp_0.9s_0.6s_ease_forwards]"
+    >
+      Hệ sinh thái đầu tư & trading dành cho thế hệ nhà đầu tư Việt Nam mới —
+      kỷ luật, có hệ thống, không cảm xúc.
+    </p>
+
+    <!-- CTA row -->
+    <div
+      class="mt-9 flex flex-wrap gap-3 md:gap-4 items-center justify-center
+             opacity-0 animate-[fadeUp_0.9s_0.8s_ease_forwards]"
+    >
+      <a
+        href="#membership"
+        class="px-7 md:px-10 py-3.5 md:py-4 bg-gold text-ink text-[13px] font-semibold tracking-[0.12em] uppercase
+               no-underline transition-all duration-300
+               hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(201,168,76,0.35)]"
+      >
+        Gia nhập cộng đồng
+      </a>
+      <a
+        href="#about"
+        class="px-7 md:px-10 py-3.5 md:py-4 border border-white/40 text-white/80 text-[13px] font-normal tracking-[0.12em] uppercase
+               no-underline transition-all duration-300 hover:border-gold hover:text-gold"
+      >
+        Tìm hiểu thêm
+      </a>
+    </div>
   </div>
 
   <!-- Stats bar -->
   <div
-    class="absolute bottom-10 inset-x-6 md:inset-x-16 z-10
-           flex justify-center flex-wrap gap-6 md:gap-16
+    class="relative z-10 w-full max-w-4xl mx-auto mt-12 md:mt-10
+           flex justify-center flex-wrap gap-y-6 gap-x-8 md:gap-0
+           border-t border-white/10 pt-8
            opacity-0 animate-[fadeUp_0.9s_1s_ease_forwards]"
   >
     {stats.map((s, i) => (
       <>
-        {i > 0 && <div class="w-px h-12 bg-white/10 hidden sm:block self-center"></div>}
-        <div class="text-center">
-          <span class="font-serif text-[38px] md:text-[44px] font-bold text-gold leading-none block">{s.num}</span>
-          <span class="text-[10px] tracking-[0.2em] uppercase text-white/40 mt-2 block">{s.label}</span>
+        {i > 0 && <div class="w-px h-12 bg-white/10 hidden md:block self-center"></div>}
+        <div class="text-center md:flex-1">
+          <span class="font-serif text-[32px] md:text-[44px] font-bold text-gold leading-none block">{s.num}</span>
+          <span class="text-[10px] tracking-[0.2em] uppercase text-white/40 mt-1 block">{s.label}</span>
         </div>
       </>
     ))}
   </div>
+
 </section>

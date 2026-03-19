@@ -25,8 +25,11 @@ const links = [
       <li>
         <a
           href={l.href}
-          class="text-[13px] font-normal tracking-[0.12em] uppercase text-white/80
-                 no-underline transition-colors duration-200 hover:text-gold"
+          class="relative text-[13px] font-normal tracking-[0.12em] uppercase text-white/80
+                 no-underline pb-1
+                 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0
+                 after:bg-gold after:transition-[width] after:duration-300 hover:after:w-full
+                 hover:text-gold transition-colors duration-200"
         >
           {l.label}
         </a>
@@ -39,8 +42,8 @@ const links = [
     href="#membership"
     class="hidden md:inline-block px-7 py-2.5
            border border-gold text-gold text-[12px] font-medium tracking-[0.12em] uppercase
-           no-underline transition-all duration-200
-           hover:bg-gold hover:text-ink"
+           no-underline transition-all duration-300
+           hover:bg-gold hover:text-ink hover:shadow-[0_0_24px_rgba(201,168,76,0.25)]"
   >
     Tham gia ngay
   </a>
@@ -48,20 +51,21 @@ const links = [
   <!-- Hamburger -->
   <button
     id="menu-toggle"
-    class="md:hidden flex flex-col gap-[5px] p-1 group"
+    class="md:hidden flex flex-col gap-[5px] p-2 -mr-1"
     aria-label="Toggle menu"
+    aria-expanded="false"
   >
-    <span class="block w-6 h-px bg-white/70 group-hover:bg-gold transition-colors"></span>
-    <span class="block w-4 h-px bg-white/70 group-hover:bg-gold transition-colors"></span>
-    <span class="block w-6 h-px bg-white/70 group-hover:bg-gold transition-colors"></span>
+    <span id="bar-top" class="block w-6 h-px bg-white/70 transition-all duration-300 origin-center"></span>
+    <span id="bar-mid" class="block w-4 h-px bg-white/70 transition-all duration-300"></span>
+    <span id="bar-bot" class="block w-6 h-px bg-white/70 transition-all duration-300 origin-center"></span>
   </button>
 </nav>
 
-<!-- Mobile menu -->
+<!-- Mobile menu overlay -->
 <div
   id="mobile-menu"
-  class="hidden fixed inset-0 z-40 bg-ink/97 backdrop-blur-2xl flex-col
-         items-center justify-center gap-8 pt-20"
+  class="fixed inset-0 z-40 bg-ink/[0.97] backdrop-blur-2xl
+         flex flex-col items-center justify-center gap-8 pt-16"
 >
   {links.map((l) => (
     <a
