@@ -1,18 +1,19 @@
 ---
 // Sources:
-//  Crypto  → Binance WebSocket (real-time, no key)
-//  Gold    → goldprice.org public endpoint (no key, CORS-enabled)
-//  EUR/USD → Frankfurter API / ECB data (no key, CORS-enabled)
+//  Crypto        → Binance WebSocket (real-time, no key)
+//  Gold          → goldprice.org public endpoint (no key, CORS-enabled)
+//  EUR/USD       → Frankfurter API / ECB data (no key, CORS-enabled)
+//  DXY/WTI/SPX/VN-Index → Twelve Data REST API (polled every 5 min)
 
 const items = [
-  { symbol: 'XAU/USD', key: 'xauusd', price: '—', change: '—', up: true  },
-  { symbol: 'BTC/USD', key: 'btcusd', price: '—', change: '—', up: true  },
-  { symbol: 'ETH/USD', key: 'ethusd', price: '—', change: '—', up: true  },
-  { symbol: 'EUR/USD', key: 'eurusd', price: '—', change: '—', up: false },
-  { symbol: 'BNB/USD', key: 'bnbusd', price: '—', change: '—', up: true  },
-  { symbol: 'SOL/USD', key: 'solusd', price: '—', change: '—', up: true  },
-  { symbol: 'XRP/USD', key: 'xrpusd', price: '—', change: '—', up: false },
-  { symbol: 'DOGE/USD',key: 'dogeusd',price: '—', change: '—', up: true  },
+  { symbol: 'XAU/USD', key: 'xauusd',  price: '—', change: '—', up: true  },
+  { symbol: 'BTC/USD', key: 'btcusd',  price: '—', change: '—', up: true  },
+  { symbol: 'ETH/USD', key: 'ethusd',  price: '—', change: '—', up: true  },
+  { symbol: 'EUR/USD', key: 'eurusd',  price: '—', change: '—', up: false },
+  { symbol: 'VN-Index',key: 'vnindex', price: '—', change: '—', up: true  },
+  { symbol: 'DXY',     key: 'dxy',     price: '—', change: '—', up: true  },
+  { symbol: 'WTI',     key: 'wti',     price: '—', change: '—', up: false },
+  { symbol: 'S&P 500', key: 'sp500',   price: '—', change: '—', up: true  },
 ];
 
 const doubled = [...items, ...items];
@@ -31,11 +32,23 @@ const doubled = [...items, ...items];
 </div>
 
 <script>
-  const DECIMALS: Record<string, number> = {
-    xauusd: 2, eurusd: 4, btcusd: 0, ethusd: 0,
-    bnbusd: 2, solusd: 2, xrpusd: 4, dogeusd: 5,
+  // ─── config ────────────────────────────────────────────────────────────
+  const TD_KEY = '8ce5d0effe4b491d8ef653e1458298d5';
+
+  // Twelve Data symbol → internal key + decimal places
+  const TD_SYMBOLS: Record<string, { key: string; dec: number }> = {
+    'DXY':     { key: 'dxy',     dec: 2 },
+    'WTI/USD': { key: 'wti',     dec: 2 },
+    'SPX':     { key: 'sp500',   dec: 0 },
+    'VNINDEX': { key: 'vnindex', dec: 1 },
   };
 
+  const DECIMALS: Record<string, number> = {
+    xauusd: 2, eurusd: 4, btcusd: 0, ethusd: 0,
+    dxy: 2, wti: 2, sp500: 0, vnindex: 1,
+  };
+
+  // ─── helpers ───────────────────────────────────────────────────────────
   function fmt(value: number, key: string): string {
     const d = DECIMALS[key] ?? 2;
     return value.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -53,16 +66,14 @@ const doubled = [...items, ...items];
     });
   }
 
-  // ── Binance WebSocket — all crypto pairs ─────────────────────────────
-  const BINANCE_STREAMS = 'btcusdt@miniTicker/ethusdt@miniTicker/bnbusdt@miniTicker/solusdt@miniTicker/xrpusdt@miniTicker/dogeusdt@miniTicker';
+  // ─── Binance WebSocket — BTC + ETH ────────────────────────────────────
+  const BINANCE_STREAMS = 'btcusdt@miniTicker/ethusdt@miniTicker';
   const BINANCE_KEY_MAP: Record<string, string> = {
-    btcusdt: 'btcusd', ethusdt: 'ethusd', bnbusdt: 'bnbusd',
-    solusdt: 'solusd', xrpusdt: 'xrpusd', dogeusdt: 'dogeusd',
+    btcusdt: 'btcusd', ethusdt: 'ethusd',
   };
 
   function connectBinance() {
     const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${BINANCE_STREAMS}`);
-
     ws.onmessage = (e) => {
       const { stream, data } = JSON.parse(e.data);
       const symbol = stream.replace('@miniTicker', '');
@@ -74,66 +85,80 @@ const doubled = [...items, ...items];
       const up    = pct >= 0;
       updateTicker(key, fmt(price, key), `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
     };
-
     ws.onclose = () => setTimeout(connectBinance, 5000);
     ws.onerror = () => ws.close();
   }
 
-  // ── goldprice.org — XAUUSD ───────────────────────────────────────────
-  // Response includes xauPrice (current) and xauClose (prev close)
+  // ─── goldprice.org — XAU/USD ──────────────────────────────────────────
   async function fetchGold() {
     try {
       const res  = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
       const json = await res.json();
       const item = json?.items?.[0];
       if (!item) return;
-
-      const price = item.xauPrice  as number;
-      const prev  = item.xauClose  as number;
+      const price = item.xauPrice as number;
+      const prev  = item.xauClose as number;
       const pct   = prev ? ((price - prev) / prev) * 100 : 0;
       const up    = pct >= 0;
       updateTicker('xauusd', fmt(price, 'xauusd'), pct ? `${up ? '+' : ''}${pct.toFixed(2)}%` : '—', up);
-    } catch {
-      // silent fail
-    }
+    } catch { /* silent */ }
   }
 
-  // ── Frankfurter (ECB) — EUR/USD ──────────────────────────────────────
+  // ─── Frankfurter (ECB) — EUR/USD ──────────────────────────────────────
   async function fetchForex() {
     try {
-      const res  = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD');
-      const json = await res.json();
-      const rate = json?.rates?.USD as number;
+      const [res, res2] = await Promise.all([
+        fetch('https://api.frankfurter.app/latest?from=EUR&to=USD'),
+        fetch(`https://api.frankfurter.app/${prevDay()}?from=EUR&to=USD`),
+      ]);
+      const [json, json2] = await Promise.all([res.json(), res2.json()]);
+      const rate     = json?.rates?.USD  as number;
+      const prevRate = json2?.rates?.USD as number;
       if (!rate) return;
-
-      // Frankfurter doesn't provide change % — fetch yesterday for comparison
-      const res2  = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD&amount=1');
-      // Use a separate call for previous day
-      const dateRes  = new Date();
-      dateRes.setDate(dateRes.getDate() - 1);
-      const prevDate = dateRes.toISOString().split('T')[0];
-      const res3     = await fetch(`https://api.frankfurter.app/${prevDate}?from=EUR&to=USD`);
-      const json3    = await res3.json();
-      const prevRate = json3?.rates?.USD as number;
-
-      if (prevRate) {
-        const pct = ((rate - prevRate) / prevRate) * 100;
-        const up  = pct >= 0;
-        updateTicker('eurusd', fmt(rate, 'eurusd'), `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
-      } else {
-        updateTicker('eurusd', fmt(rate, 'eurusd'), '—', true);
-      }
-    } catch {
-      // silent fail
-    }
+      const pct = prevRate ? ((rate - prevRate) / prevRate) * 100 : 0;
+      const up  = pct >= 0;
+      updateTicker('eurusd', fmt(rate, 'eurusd'), pct ? `${up ? '+' : ''}${pct.toFixed(2)}%` : '—', up);
+    } catch { /* silent */ }
   }
 
-  // ── boot ─────────────────────────────────────────────────────────────
+  function prevDay(): string {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+  }
+
+  // ─── Twelve Data — DXY, WTI, SPX, VNINDEX ────────────────────────────
+  async function fetchTwelveData() {
+    const symbols = Object.keys(TD_SYMBOLS).join(',');
+    try {
+      const res  = await fetch(
+        `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(symbols)}&apikey=${TD_KEY}`
+      );
+      const json = await res.json();
+
+      for (const [tdSymbol, { key, dec }] of Object.entries(TD_SYMBOLS)) {
+        const q = json[tdSymbol];
+        if (!q || q.status === 'error') continue;
+
+        const price = parseFloat(q.close);
+        const pct   = parseFloat(q.percent_change);
+        const up    = pct >= 0;
+        const priceStr = price.toLocaleString('en-US', {
+          minimumFractionDigits: dec,
+          maximumFractionDigits: dec,
+        });
+        updateTicker(key, priceStr, `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
+      }
+    } catch { /* silent */ }
+  }
+
+  // ─── boot ─────────────────────────────────────────────────────────────
   connectBinance();
   fetchGold();
   fetchForex();
+  fetchTwelveData();
 
-  // Refresh gold + forex every 60s
-  setInterval(fetchGold, 60_000);
-  setInterval(fetchForex, 60_000);
+  setInterval(fetchGold,        60_000);   // every 1 min
+  setInterval(fetchForex,       60_000);   // every 1 min
+  setInterval(fetchTwelveData,  5 * 60_000); // every 5 min (conserve quota)
 </script>
