@@ -1,19 +1,25 @@
 ---
-// Sources:
-//  Crypto        → Binance WebSocket (real-time, no key)
-//  Gold          → goldprice.org public endpoint (no key, CORS-enabled)
-//  EUR/USD       → Frankfurter API / ECB data (no key, CORS-enabled)
-//  DXY/WTI/SPX/VN-Index → Twelve Data REST API (polled every 5 min)
-
 const items = [
-  { symbol: 'XAU/USD', key: 'xauusd',  price: '—', change: '—', up: true  },
-  { symbol: 'BTC/USD', key: 'btcusd',  price: '—', change: '—', up: true  },
-  { symbol: 'ETH/USD', key: 'ethusd',  price: '—', change: '—', up: true  },
-  { symbol: 'EUR/USD', key: 'eurusd',  price: '—', change: '—', up: false },
-  { symbol: 'VN-Index',key: 'vnindex', price: '—', change: '—', up: true  },
-  { symbol: 'DXY',     key: 'dxy',     price: '—', change: '—', up: true  },
-  { symbol: 'WTI',     key: 'wti',     price: '—', change: '—', up: false },
-  { symbol: 'S&P 500', key: 'sp500',   price: '—', change: '—', up: true  },
+  { symbol: 'BTC/USD',  key: 'btcusdt',  dec: 0 },
+  { symbol: 'ETH/USD',  key: 'ethusdt',  dec: 1 },
+  { symbol: 'SOL/USD',  key: 'solusdt',  dec: 2 },
+  { symbol: 'BNB/USD',  key: 'bnbusdt',  dec: 1 },
+  { symbol: 'XRP/USD',  key: 'xrpusdt',  dec: 4 },
+  { symbol: 'DOGE/USD', key: 'dogeusdt', dec: 5 },
+  { symbol: 'ADA/USD',  key: 'adausdt',  dec: 4 },
+  { symbol: 'AVAX/USD', key: 'avaxusdt', dec: 2 },
+  { symbol: 'LINK/USD', key: 'linkusdt', dec: 2 },
+  { symbol: 'DOT/USD',  key: 'dotusdt',  dec: 3 },
+  { symbol: 'LTC/USD',  key: 'ltcusdt',  dec: 2 },
+  { symbol: 'UNI/USD',  key: 'uniusdt',  dec: 2 },
+  { symbol: 'NEAR/USD', key: 'nearusdt', dec: 3 },
+  { symbol: 'APT/USD',  key: 'aptusdt',  dec: 2 },
+  { symbol: 'SUI/USD',  key: 'suiusdt',  dec: 3 },
+  { symbol: 'OP/USD',   key: 'opusdt',   dec: 3 },
+  { symbol: 'ARB/USD',  key: 'arbusdt',  dec: 4 },
+  { symbol: 'ATOM/USD', key: 'atomusdt', dec: 2 },
+  { symbol: 'PEPE/USD', key: 'pepeusdt', dec: 8 },
+  { symbol: 'TON/USD',  key: 'tonusdt',  dec: 3 },
 ];
 
 const doubled = [...items, ...items];
@@ -24,31 +30,22 @@ const doubled = [...items, ...items];
     {doubled.map((item) => (
       <div class="flex items-center gap-2.5 font-mono text-[12px] text-white/40" data-ticker={item.key}>
         <span class="text-white/80 font-medium">{item.symbol}</span>
-        <span class="ticker-price">{item.price}</span>
-        <span class="ticker-change text-white/40">{item.change}</span>
+        <span class="ticker-price">—</span>
+        <span class="ticker-change">—</span>
       </div>
     ))}
   </div>
 </div>
 
 <script>
-  // ─── config ────────────────────────────────────────────────────────────
-  const TD_KEY = '8ce5d0effe4b491d8ef653e1458298d5';
-
-  // Twelve Data symbol → internal key + decimal places
-  const TD_SYMBOLS: Record<string, { key: string; dec: number }> = {
-    'DXY':     { key: 'dxy',     dec: 2 },
-    'WTI/USD': { key: 'wti',     dec: 2 },
-    'SPX':     { key: 'sp500',   dec: 0 },
-    'VNINDEX': { key: 'vnindex', dec: 1 },
-  };
-
   const DECIMALS: Record<string, number> = {
-    xauusd: 2, eurusd: 4, btcusd: 0, ethusd: 0,
-    dxy: 2, wti: 2, sp500: 0, vnindex: 1,
+    btcusdt: 0,  ethusdt: 1,  solusdt: 2,  bnbusdt: 1,
+    xrpusdt: 4,  dogeusdt: 5, adausdt: 4,  avaxusdt: 2,
+    linkusdt: 2, dotusdt: 3,  ltcusdt: 2,  uniusdt: 2,
+    nearusdt: 3, aptusdt: 2,  suiusdt: 3,  opusdt: 3,
+    arbusdt: 4,  atomusdt: 2, pepeusdt: 8, tonusdt: 3,
   };
 
-  // ─── helpers ───────────────────────────────────────────────────────────
   function fmt(value: number, key: string): string {
     const d = DECIMALS[key] ?? 2;
     return value.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -66,99 +63,24 @@ const doubled = [...items, ...items];
     });
   }
 
-  // ─── Binance WebSocket — BTC + ETH ────────────────────────────────────
-  const BINANCE_STREAMS = 'btcusdt@miniTicker/ethusdt@miniTicker';
-  const BINANCE_KEY_MAP: Record<string, string> = {
-    btcusdt: 'btcusd', ethusdt: 'ethusd',
-  };
+  const streams = Object.keys(DECIMALS).map(s => `${s}@miniTicker`).join('/');
 
-  function connectBinance() {
-    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${BINANCE_STREAMS}`);
+  function connect() {
+    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
     ws.onmessage = (e) => {
       const { stream, data } = JSON.parse(e.data);
-      const symbol = stream.replace('@miniTicker', '');
-      const key    = BINANCE_KEY_MAP[symbol];
-      if (!key) return;
+      const key   = stream.replace('@miniTicker', '');
       const price = parseFloat(data.c);
       const open  = parseFloat(data.o);
       const pct   = ((price - open) / open) * 100;
       const up    = pct >= 0;
       updateTicker(key, fmt(price, key), `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
     };
-    ws.onclose = () => setTimeout(connectBinance, 5000);
+
+    ws.onclose = () => setTimeout(connect, 5000);
     ws.onerror = () => ws.close();
   }
 
-  // ─── goldprice.org — XAU/USD ──────────────────────────────────────────
-  async function fetchGold() {
-    try {
-      const res  = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
-      const json = await res.json();
-      const item = json?.items?.[0];
-      if (!item) return;
-      const price = item.xauPrice as number;
-      const prev  = item.xauClose as number;
-      const pct   = prev ? ((price - prev) / prev) * 100 : 0;
-      const up    = pct >= 0;
-      updateTicker('xauusd', fmt(price, 'xauusd'), pct ? `${up ? '+' : ''}${pct.toFixed(2)}%` : '—', up);
-    } catch { /* silent */ }
-  }
-
-  // ─── Frankfurter (ECB) — EUR/USD ──────────────────────────────────────
-  async function fetchForex() {
-    try {
-      const [res, res2] = await Promise.all([
-        fetch('https://api.frankfurter.app/latest?from=EUR&to=USD'),
-        fetch(`https://api.frankfurter.app/${prevDay()}?from=EUR&to=USD`),
-      ]);
-      const [json, json2] = await Promise.all([res.json(), res2.json()]);
-      const rate     = json?.rates?.USD  as number;
-      const prevRate = json2?.rates?.USD as number;
-      if (!rate) return;
-      const pct = prevRate ? ((rate - prevRate) / prevRate) * 100 : 0;
-      const up  = pct >= 0;
-      updateTicker('eurusd', fmt(rate, 'eurusd'), pct ? `${up ? '+' : ''}${pct.toFixed(2)}%` : '—', up);
-    } catch { /* silent */ }
-  }
-
-  function prevDay(): string {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d.toISOString().split('T')[0];
-  }
-
-  // ─── Twelve Data — DXY, WTI, SPX, VNINDEX ────────────────────────────
-  async function fetchTwelveData() {
-    const symbols = Object.keys(TD_SYMBOLS).join(',');
-    try {
-      const res  = await fetch(
-        `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(symbols)}&apikey=${TD_KEY}`
-      );
-      const json = await res.json();
-
-      for (const [tdSymbol, { key, dec }] of Object.entries(TD_SYMBOLS)) {
-        const q = json[tdSymbol];
-        if (!q || q.status === 'error') continue;
-
-        const price = parseFloat(q.close);
-        const pct   = parseFloat(q.percent_change);
-        const up    = pct >= 0;
-        const priceStr = price.toLocaleString('en-US', {
-          minimumFractionDigits: dec,
-          maximumFractionDigits: dec,
-        });
-        updateTicker(key, priceStr, `${up ? '+' : ''}${pct.toFixed(2)}%`, up);
-      }
-    } catch { /* silent */ }
-  }
-
-  // ─── boot ─────────────────────────────────────────────────────────────
-  connectBinance();
-  fetchGold();
-  fetchForex();
-  fetchTwelveData();
-
-  setInterval(fetchGold,        60_000);   // every 1 min
-  setInterval(fetchForex,       60_000);   // every 1 min
-  setInterval(fetchTwelveData,  5 * 60_000); // every 5 min (conserve quota)
+  connect();
 </script>
