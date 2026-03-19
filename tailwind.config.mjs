@@ -49,7 +49,7 @@ export default {
       },
       animation: {
         'fade-up':    'fadeUp 0.8s ease forwards',
-        'ticker':     'ticker 32s linear infinite',
+        'ticker':     'ticker 60s linear infinite',
         'reveal':     'revealIn 0.7s ease forwards',
         'float':      'floatY 3s ease-in-out infinite',
         'shimmer':    'shimmer 2.5s linear infinite',
