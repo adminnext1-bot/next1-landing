@@ -1,0 +1,197 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import { getAllPosts, getPostBySlug } from '../../lib/sanity';
+import { toHTML } from '@portabletext/to-html';
+import '../../styles/global.css';
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug.current },
+  }));
+}
+
+const { slug } = Astro.params;
+const post = await getPostBySlug(slug!);
+
+if (!post) return Astro.redirect('/blog');
+
+const bodyHtml = post.body ? toHTML(post.body) : '';
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('vi-VN', {
+    day: '2-digit', month: 'long', year: 'numeric',
+  });
+}
+---
+
+<Layout title={`${post.title} – NEXT 1`} description={post.excerpt}>
+  <Nav />
+  <main class="pt-[72px] min-h-screen">
+
+    <!-- Post header -->
+    <header class="relative border-b border-white/10 px-6 md:px-16 py-16 md:py-24 overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(201,168,76,0.06),transparent_70%)] pointer-events-none"></div>
+      <div class="relative z-10 max-w-3xl mx-auto">
+
+        <!-- Back -->
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.3em] uppercase text-white/40
+                 hover:text-gold no-underline transition-colors duration-200 mb-8"
+        >
+          ← Blog
+        </a>
+
+        <!-- Category + date -->
+        <div class="flex items-center gap-3 mb-5">
+          {post.category && (
+            <span class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold">{post.category}</span>
+          )}
+          {post.category && post.publishedAt && <span class="text-white/20">·</span>}
+          {post.publishedAt && (
+            <span class="font-mono text-[10px] tracking-[0.15em] text-white/40">{formatDate(post.publishedAt)}</span>
+          )}
+          {post.author && (
+            <>
+              <span class="text-white/20">·</span>
+              <span class="font-mono text-[10px] tracking-[0.15em] text-white/40">{post.author}</span>
+            </>
+          )}
+        </div>
+
+        <!-- Title -->
+        <h1 class="font-serif text-[clamp(28px,4vw,52px)] font-bold leading-[1.1] tracking-tight mb-6">
+          {post.title}
+        </h1>
+
+        <!-- Excerpt -->
+        {post.excerpt && (
+          <p class="text-[17px] text-white/60 font-light leading-relaxed max-w-xl">
+            {post.excerpt}
+          </p>
+        )}
+      </div>
+    </header>
+
+    <!-- Cover image -->
+    {post.coverImage?.asset?.url && (
+      <div class="max-w-4xl mx-auto px-6 md:px-16 pt-12">
+        <img
+          src={post.coverImage.asset.url}
+          alt={post.coverImage.alt ?? post.title}
+          class="w-full aspect-[16/9] object-cover border border-white/10"
+        />
+      </div>
+    )}
+
+    <!-- Body -->
+    <article class="max-w-3xl mx-auto px-6 md:px-16 py-14 md:py-20 prose-next1">
+      <Fragment set:html={bodyHtml} />
+    </article>
+
+    <hr class="gold-rule max-w-3xl mx-auto" />
+
+    <!-- Back to blog -->
+    <div class="max-w-3xl mx-auto px-6 md:px-16 py-12 flex justify-between items-center">
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] uppercase text-white/50
+               hover:text-gold no-underline transition-colors duration-200 hover:gap-3"
+      >
+        ← Tất cả bài viết
+      </a>
+      <a
+        href="#contact"
+        class="font-mono text-[11px] tracking-[0.2em] uppercase text-gold no-underline hover:text-gold-light transition-colors duration-200"
+      >
+        Liên hệ NEXT 1
+      </a>
+    </div>
+
+    <Footer />
+  </main>
+</Layout>
+
+<style is:global>
+  .prose-next1 {
+    color: rgba(255,255,255,0.75);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.85;
+  }
+  .prose-next1 h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 700;
+    color: #fff;
+    margin-top: 2.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.2;
+  }
+  .prose-next1 h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 2.5vw, 22px);
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+  .prose-next1 p { margin-bottom: 1.4em; }
+  .prose-next1 a {
+    color: #C9A84C;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose-next1 strong {
+    color: #fff;
+    font-weight: 600;
+  }
+  .prose-next1 em { font-style: italic; color: rgba(255,255,255,0.85); }
+  .prose-next1 blockquote {
+    border-left: 2px solid #C9A84C;
+    padding-left: 1.25rem;
+    margin: 2em 0;
+    color: rgba(255,255,255,0.5);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05em;
+  }
+  .prose-next1 ul { list-style: none; padding: 0; margin-bottom: 1.4em; }
+  .prose-next1 ul li {
+    padding-left: 1.25em;
+    position: relative;
+    margin-bottom: 0.4em;
+  }
+  .prose-next1 ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #C9A84C;
+    font-weight: 400;
+  }
+  .prose-next1 ol { padding-left: 1.5em; margin-bottom: 1.4em; }
+  .prose-next1 ol li { margin-bottom: 0.4em; }
+  .prose-next1 code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: rgba(201,168,76,0.08);
+    color: #C9A84C;
+    padding: 0.15em 0.4em;
+    border-radius: 2px;
+  }
+  .prose-next1 hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+    margin: 2.5em 0;
+  }
+  .prose-next1 img {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin: 1.5em 0;
+  }
+</style>
