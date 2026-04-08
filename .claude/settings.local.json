@@ -4,7 +4,13 @@
       "Bash(gh auth:*)",
       "Bash(git --version)",
       "Bash(git config:*)",
-      "Bash(wrangler --version)"
+      "Bash(wrangler --version)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p src/components/common src/components/home src/components/blog)",
+      "Bash(mv src/components/Nav.astro src/components/common/)",
+      "Bash(mv src/components/Footer.astro src/components/common/)",
+      "Bash(mv src/components/Hero.astro src/components/home/)",
+      "Bash(mv src/components/About.astro src/components/home/)"
     ]
   }
 }

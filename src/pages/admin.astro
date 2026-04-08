@@ -1,301 +1,482 @@
 ---
 import '../styles/global.css';
-
 const PROJECT_ID = import.meta.env.SANITY_PROJECT_ID;
 const DATASET    = import.meta.env.SANITY_DATASET ?? 'production';
 const TOKEN      = import.meta.env.SANITY_TOKEN;
 ---
 
 <!doctype html>
-<html lang="vi" class="scroll-smooth">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEXT 1 — Quản lý Blog</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+  <title>NEXT 1 — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
 </head>
 <body class="bg-ink text-white min-h-screen">
 
-  <!-- Password gate -->
+  <!-- ── GATE ── -->
   <div id="gate" class="fixed inset-0 bg-ink z-50 flex items-center justify-center px-6">
     <div class="w-full max-w-sm">
-      <p class="font-mono text-[10px] tracking-[0.4em] uppercase text-gold mb-6 text-center">// NEXT 1 Admin</p>
-      <h1 class="font-serif text-3xl font-bold text-center mb-8">Đăng nhập</h1>
-      <input
-        id="password-input"
-        type="password"
-        placeholder="Nhập mật khẩu..."
+      <p class="font-mono text-[10px] tracking-[0.4em] uppercase text-gold mb-6 text-center">// NEXT 1</p>
+      <h1 class="font-serif text-3xl font-bold text-center mb-8">Admin Panel</h1>
+      <input id="pwd" type="password" placeholder="Mật khẩu..."
         class="w-full bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
-               placeholder:text-white/20 focus:outline-none focus:border-gold/60 mb-3"
-      />
-      <button
-        id="password-btn"
+               placeholder:text-white/20 focus:outline-none focus:border-gold/60 mb-3" />
+      <button id="pwd-btn"
         class="w-full py-3 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
-               hover:bg-gold-light transition-all duration-300"
-      >
-        Vào trang quản lý
+               hover:bg-gold-light transition-all duration-300">
+        Đăng nhập
       </button>
-      <p id="gate-error" class="hidden mt-3 text-center text-red-400 text-[13px]">Sai mật khẩu.</p>
+      <p id="pwd-err" class="hidden mt-3 text-center text-red-400 text-[13px]">Sai mật khẩu.</p>
     </div>
   </div>
 
-  <!-- Admin panel -->
-  <div id="panel" class="hidden max-w-3xl mx-auto px-6 py-12">
+  <!-- ── PANEL ── -->
+  <div id="panel" class="hidden">
 
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-10">
-      <div>
-        <p class="font-mono text-[10px] tracking-[0.4em] uppercase text-gold mb-1">// NEXT 1 Admin</p>
-        <h1 class="font-serif text-3xl font-bold">Viết bài mới</h1>
+    <!-- Sidebar -->
+    <aside class="fixed top-0 left-0 h-full w-56 bg-ink-2 border-r border-white/10 flex flex-col z-40">
+      <div class="px-6 py-6 border-b border-white/10">
+        <p class="font-serif text-lg font-bold">NEXT<span class="italic font-normal text-white">1</span></p>
+        <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-gold mt-0.5">Admin Panel</p>
       </div>
-      <a href="/blog" class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40 hover:text-gold no-underline transition-colors">
-        ← Blog
-      </a>
-    </div>
-
-    <!-- Form -->
-    <form id="post-form" class="flex flex-col gap-5">
-
-      <!-- Title -->
-      <div class="flex flex-col gap-1.5">
-        <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tiêu đề *</label>
-        <input
-          id="f-title" type="text" required
-          placeholder="Tiêu đề bài viết..."
-          class="bg-ink-2 border border-white/10 px-4 py-3 text-[15px] text-white/90
-                 placeholder:text-white/20 focus:outline-none focus:border-gold/60"
-        />
+      <nav class="flex-1 px-3 py-4 flex flex-col gap-1">
+        <button data-tab="write"
+          class="tab-btn active-tab text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors">
+          ✏️ Viết bài mới
+        </button>
+        <button data-tab="posts"
+          class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
+          📋 Quản lý bài viết
+        </button>
+      </nav>
+      <div class="px-6 py-4 border-t border-white/10">
+        <a href="/blog" target="_blank"
+          class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 hover:text-gold no-underline transition-colors">
+          Xem Blog →
+        </a>
       </div>
+    </aside>
 
-      <!-- Slug -->
-      <div class="flex flex-col gap-1.5">
-        <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Đường dẫn (tự động tạo)</label>
-        <input
-          id="f-slug" type="text"
-          placeholder="duong-dan-bai-viet"
-          class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/60
-                 placeholder:text-white/20 focus:outline-none focus:border-gold/60 font-mono"
-        />
-      </div>
+    <!-- Main content -->
+    <main class="ml-56 min-h-screen px-8 py-10 max-w-3xl">
 
-      <!-- Excerpt -->
-      <div class="flex flex-col gap-1.5">
-        <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tóm tắt</label>
-        <textarea
-          id="f-excerpt" rows="2"
-          placeholder="Mô tả ngắn hiện trên trang danh sách..."
-          class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
-                 placeholder:text-white/20 focus:outline-none focus:border-gold/60 resize-none"
-        ></textarea>
-      </div>
+      <!-- ── TAB: WRITE ── -->
+      <div id="tab-write">
+        <h2 class="font-serif text-2xl font-bold mb-8" id="form-heading">Viết bài mới</h2>
 
-      <!-- Category + Author -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Danh mục</label>
-          <div class="relative">
-            <select
-              id="f-category"
-              class="w-full bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
-                     focus:outline-none focus:border-gold/60 appearance-none cursor-pointer"
-            >
-              <option value="">— Chọn danh mục —</option>
-              <option value="Phân tích thị trường">Phân tích thị trường</option>
-              <option value="Chiến lược giao dịch">Chiến lược giao dịch</option>
-              <option value="Tư duy đầu tư">Tư duy đầu tư</option>
-              <option value="Giáo dục tài chính">Giáo dục tài chính</option>
-              <option value="Tin tức & Cập nhật">Tin tức & Cập nhật</option>
-            </select>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gold/60 pointer-events-none text-[10px]">▼</span>
+        <form id="post-form" class="flex flex-col gap-5">
+          <input id="edit-id" type="hidden" value="" />
+
+          <!-- Title -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tiêu đề *</label>
+            <input id="f-title" type="text" required placeholder="Tiêu đề bài viết..."
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[15px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
           </div>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tác giả</label>
-          <input
-            id="f-author" type="text"
-            value="NEXT 1 Team"
-            class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
-                   focus:outline-none focus:border-gold/60"
-          />
-        </div>
-      </div>
 
-      <!-- Body -->
-      <div class="flex flex-col gap-1.5">
-        <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Nội dung bài viết *</label>
-        <textarea
-          id="f-body" rows="16" required
-          placeholder="Viết nội dung bài viết ở đây...
+          <!-- Slug -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Đường dẫn URL</label>
+            <input id="f-slug" type="text" placeholder="tu-dong-tao-tu-tieu-de"
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[13px] text-white/50 font-mono
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+          </div>
 
-Bạn có thể xuống dòng để tạo đoạn văn mới."
-          class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
-                 placeholder:text-white/20 focus:outline-none focus:border-gold/60 resize-y font-sans leading-relaxed"
-        ></textarea>
-      </div>
+          <!-- Excerpt -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tóm tắt</label>
+            <textarea id="f-excerpt" rows="2" placeholder="Mô tả ngắn hiện trên trang danh sách..."
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60 resize-none"></textarea>
+          </div>
 
-      <!-- Submit -->
-      <button
-        id="submit-btn" type="submit"
-        class="mt-2 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
-               hover:bg-gold-light transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Đăng bài
-      </button>
-
-      <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">
-        ✓ Đăng bài thành công!
-      </p>
-      <p id="form-error" class="hidden text-center text-red-400 text-[14px] py-2">
-        Có lỗi xảy ra. Vui lòng thử lại.
-      </p>
-
-    </form>
-
-    <!-- Post list -->
-    <div class="mt-16">
-      <h2 class="font-serif text-xl font-bold mb-6">Bài viết đã đăng</h2>
-      <div id="post-list" class="flex flex-col gap-3">
-        <p class="text-white/30 text-[13px] font-mono">Đang tải...</p>
-      </div>
-    </div>
-
-  </div>
-
-  <script define:vars={{ PROJECT_ID, DATASET, TOKEN }}>
-    const ADMIN_PASSWORD = 'next1admin2026';
-    const API = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data`;
-
-    // --- Gate ---
-    const gate     = document.getElementById('gate');
-    const panel    = document.getElementById('panel');
-    const pwdInput = document.getElementById('password-input');
-    const pwdBtn   = document.getElementById('password-btn');
-    const gateErr  = document.getElementById('gate-error');
-
-    function unlock() {
-      if (pwdInput.value === ADMIN_PASSWORD) {
-        gate.style.display = 'none';
-        panel.classList.remove('hidden');
-        loadPosts();
-      } else {
-        gateErr.classList.remove('hidden');
-        pwdInput.value = '';
-      }
-    }
-
-    pwdBtn.addEventListener('click', unlock);
-    pwdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
-
-    // --- Slug generator ---
-    document.getElementById('f-title').addEventListener('input', (e) => {
-      const slug = e.target.value
-        .toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/đ/g, 'd')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim().replace(/\s+/g, '-');
-      document.getElementById('f-slug').value = slug;
-    });
-
-    // --- Submit ---
-    document.getElementById('post-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn     = document.getElementById('submit-btn');
-      const success = document.getElementById('form-success');
-      const errEl   = document.getElementById('form-error');
-
-      btn.disabled    = true;
-      btn.textContent = 'Đang đăng...';
-      success.classList.add('hidden');
-      errEl.classList.add('hidden');
-
-      const title    = document.getElementById('f-title').value.trim();
-      const slug     = document.getElementById('f-slug').value.trim() || title.toLowerCase().replace(/\s+/g, '-');
-      const excerpt  = document.getElementById('f-excerpt').value.trim();
-      const category = document.getElementById('f-category').value;
-      const author   = document.getElementById('f-author').value.trim();
-      const bodyText = document.getElementById('f-body').value.trim();
-
-      // Convert plain text to Sanity block content
-      const body = bodyText.split('\n\n').filter(p => p.trim()).map(para => ({
-        _type: 'block',
-        _key: Math.random().toString(36).slice(2),
-        style: 'normal',
-        markDefs: [],
-        children: [{ _type: 'span', _key: Math.random().toString(36).slice(2), text: para.trim(), marks: [] }],
-      }));
-
-      const doc = {
-        _type: 'post',
-        title,
-        slug: { _type: 'slug', current: slug },
-        excerpt,
-        category,
-        author,
-        publishedAt: new Date().toISOString(),
-        body,
-      };
-
-      try {
-        const res = await fetch(`${API}/mutate/${DATASET}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TOKEN}`,
-          },
-          body: JSON.stringify({ mutations: [{ create: doc }] }),
-        });
-
-        if (!res.ok) throw new Error(await res.text());
-
-        success.classList.remove('hidden');
-        document.getElementById('post-form').reset();
-        document.getElementById('f-author').value = 'NEXT 1 Team';
-        loadPosts();
-      } catch (err) {
-        console.error(err);
-        errEl.classList.remove('hidden');
-      } finally {
-        btn.disabled    = false;
-        btn.textContent = 'Đăng bài';
-      }
-    });
-
-    // --- Load posts ---
-    async function loadPosts() {
-      const listEl = document.getElementById('post-list');
-      try {
-        const query = encodeURIComponent('*[_type == "post"] | order(publishedAt desc) { _id, title, slug, publishedAt, category }');
-        const res   = await fetch(`${API}/query/${DATASET}?query=${query}`, {
-          headers: { 'Authorization': `Bearer ${TOKEN}` },
-        });
-        const { result } = await res.json();
-
-        if (!result || result.length === 0) {
-          listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Chưa có bài viết nào.</p>';
-          return;
-        }
-
-        listEl.innerHTML = result.map(p => `
-          <div class="flex items-center justify-between border border-white/10 px-4 py-3 hover:border-white/20 transition-colors">
-            <div>
-              <p class="text-[14px] text-white/90">${p.title}</p>
-              <p class="text-[11px] font-mono text-white/30 mt-0.5">
-                ${p.category ?? '—'} · ${p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('vi-VN') : 'Chưa đặt ngày'}
-              </p>
+          <!-- Category + Author -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Danh mục</label>
+              <div class="relative">
+                <select id="f-category"
+                  class="w-full bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                         focus:outline-none focus:border-gold/60 appearance-none cursor-pointer">
+                  <option value="">— Chọn danh mục —</option>
+                  <option value="Phân tích thị trường">Phân tích thị trường</option>
+                  <option value="Chiến lược giao dịch">Chiến lược giao dịch</option>
+                  <option value="Tư duy đầu tư">Tư duy đầu tư</option>
+                  <option value="Giáo dục tài chính">Giáo dục tài chính</option>
+                  <option value="Tin tức & Cập nhật">Tin tức & Cập nhật</option>
+                </select>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gold/60 pointer-events-none text-[10px]">▼</span>
+              </div>
             </div>
-            <a href="/blog/${p.slug?.current}" target="_blank"
-               class="font-mono text-[10px] tracking-[0.2em] uppercase text-gold hover:text-gold-light no-underline transition-colors">
-              Xem →
-            </a>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tác giả</label>
+              <input id="f-author" type="text" value="NEXT 1 Team"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       focus:outline-none focus:border-gold/60" />
+            </div>
           </div>
-        `).join('');
-      } catch {
-        listEl.innerHTML = '<p class="text-red-400 text-[13px] font-mono">Không tải được danh sách bài.</p>';
-      }
+
+          <!-- Rich text toolbar -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Nội dung *</label>
+            <div class="border border-white/10 focus-within:border-gold/60 transition-colors">
+              <div class="flex gap-1 px-3 py-2 border-b border-white/10 bg-ink-3">
+                {[
+                  { cmd: 'heading', label: 'H2' },
+                  { cmd: 'bold',    label: 'B' },
+                  { cmd: 'italic',  label: 'I' },
+                  { cmd: 'quote',   label: '❝' },
+                  { cmd: 'ul',      label: '• List' },
+                ].map(btn => (
+                  <button type="button" data-cmd={btn.cmd}
+                    class="toolbar-btn px-2.5 py-1 text-[11px] font-mono text-white/50 hover:text-gold
+                           hover:bg-white/5 transition-colors rounded">
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+              <textarea id="f-body" rows="16" required
+                placeholder="Viết nội dung bài viết...
+
+Xuống 1 dòng trống = đoạn văn mới
+## Tiêu đề H2
+**in đậm**
+*in nghiêng*
+> trích dẫn
+- bullet point"
+                class="w-full bg-transparent px-4 py-3 text-[14px] text-white/90 font-mono leading-relaxed
+                       placeholder:text-white/20 focus:outline-none resize-y"></textarea>
+            </div>
+            <p class="text-[11px] text-white/30 font-mono">Hỗ trợ Markdown: **đậm**, *nghiêng*, ## tiêu đề, &gt; trích dẫn, - danh sách</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-3 mt-2">
+            <button id="submit-btn" type="submit"
+              class="flex-1 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
+                     hover:bg-gold-light transition-all duration-300 disabled:opacity-50">
+              Đăng bài
+            </button>
+            <button id="cancel-edit" type="button"
+              class="hidden px-6 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
+                     hover:border-white/40 hover:text-white transition-all duration-300">
+              Hủy
+            </button>
+          </div>
+
+          <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Lưu thành công!</p>
+          <p id="form-error"   class="hidden text-center text-red-400 text-[14px] py-2">Có lỗi xảy ra. Thử lại.</p>
+        </form>
+      </div>
+
+      <!-- ── TAB: POSTS ── -->
+      <div id="tab-posts" class="hidden">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="font-serif text-2xl font-bold">Quản lý bài viết</h2>
+          <button data-tab="write"
+            class="tab-btn font-mono text-[11px] tracking-[0.2em] uppercase text-gold hover:text-gold-light transition-colors">
+            + Viết bài mới
+          </button>
+        </div>
+        <div id="post-list" class="flex flex-col gap-3">
+          <p class="text-white/30 text-[13px] font-mono">Đang tải...</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── DELETE MODAL ── -->
+  <div id="delete-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-6">
+    <div class="bg-ink-2 border border-white/10 p-8 max-w-sm w-full">
+      <h3 class="font-serif text-xl font-bold mb-3">Xóa bài viết?</h3>
+      <p class="text-white/50 text-[14px] mb-6">Hành động này không thể hoàn tác.</p>
+      <div class="flex gap-3">
+        <button id="confirm-delete"
+          class="flex-1 py-3 bg-red-500/80 text-white text-[12px] font-semibold tracking-[0.1em] uppercase
+                 hover:bg-red-500 transition-colors">
+          Xóa
+        </button>
+        <button id="cancel-delete"
+          class="flex-1 py-3 border border-white/20 text-white/60 text-[12px] tracking-[0.1em] uppercase
+                 hover:border-white/40 hover:text-white transition-colors">
+          Hủy
+        </button>
+      </div>
+    </div>
+  </div>
+
+<style>
+  .active-tab { color: #C9A84C !important; background: rgba(201,168,76,0.08); }
+</style>
+
+<script define:vars={{ PROJECT_ID, DATASET, TOKEN }}>
+  const API      = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data`;
+  const HEADERS  = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
+  const PASSWORD = 'next1admin2026';
+
+  // ── GATE ──
+  const gate = document.getElementById('gate');
+  const panel = document.getElementById('panel');
+  document.getElementById('pwd-btn').addEventListener('click', tryLogin);
+  document.getElementById('pwd').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+  function tryLogin() {
+    if (document.getElementById('pwd').value === PASSWORD) {
+      gate.style.display = 'none';
+      panel.classList.remove('hidden');
+      loadPosts();
+    } else {
+      document.getElementById('pwd-err').classList.remove('hidden');
+      document.getElementById('pwd').value = '';
     }
-  </script>
+  }
+
+  // ── TABS ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.getElementById('tab-write').classList.toggle('hidden', tab !== 'write');
+      document.getElementById('tab-posts').classList.toggle('hidden', tab !== 'posts');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+      document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => b.classList.add('active-tab'));
+      if (tab === 'posts') loadPosts();
+    });
+  });
+
+  // ── SLUG AUTO-GENERATE ──
+  document.getElementById('f-title').addEventListener('input', e => {
+    if (document.getElementById('edit-id').value) return; // don't overwrite on edit
+    document.getElementById('f-slug').value = slugify(e.target.value);
+  });
+
+  function slugify(str) {
+    return str.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/[^a-z0-9\s-]/g, '')
+      .trim().replace(/\s+/g, '-');
+  }
+
+  // ── TOOLBAR ──
+  document.querySelectorAll('.toolbar-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const body = document.getElementById('f-body');
+      const start = body.selectionStart;
+      const end   = body.selectionEnd;
+      const sel   = body.value.slice(start, end);
+      const wrap  = {
+        bold:    () => `**${sel || 'text'}**`,
+        italic:  () => `*${sel || 'text'}*`,
+        heading: () => `## ${sel || 'Tiêu đề'}`,
+        quote:   () => `> ${sel || 'Trích dẫn'}`,
+        ul:      () => `- ${sel || 'Mục'}`,
+      };
+      if (wrap[btn.dataset.cmd]) {
+        const inserted = wrap[btn.dataset.cmd]();
+        body.value = body.value.slice(0, start) + inserted + body.value.slice(end);
+        body.focus();
+      }
+    });
+  });
+
+  // ── SUBMIT ──
+  document.getElementById('post-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn     = document.getElementById('submit-btn');
+    const success = document.getElementById('form-success');
+    const errEl   = document.getElementById('form-error');
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+    success.classList.add('hidden'); errEl.classList.add('hidden');
+
+    const editId   = document.getElementById('edit-id').value;
+    const title    = document.getElementById('f-title').value.trim();
+    const slug     = document.getElementById('f-slug').value.trim() || slugify(title);
+    const excerpt  = document.getElementById('f-excerpt').value.trim();
+    const category = document.getElementById('f-category').value;
+    const author   = document.getElementById('f-author').value.trim();
+    const bodyText = document.getElementById('f-body').value.trim();
+    const body     = parseMarkdown(bodyText);
+
+    const doc = {
+      title, excerpt, category, author,
+      slug: { _type: 'slug', current: slug },
+      publishedAt: new Date().toISOString(),
+      body,
+    };
+
+    try {
+      let mutations;
+      if (editId) {
+        mutations = [{ patch: { id: editId, set: doc } }];
+      } else {
+        mutations = [{ create: { _type: 'post', ...doc } }];
+      }
+      const res = await fetch(`${API}/mutate/${DATASET}`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ mutations }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      success.classList.remove('hidden');
+      resetForm();
+    } catch {
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Đăng bài';
+    }
+  });
+
+  // ── PARSE MARKDOWN → Sanity blocks ──
+  function parseMarkdown(text) {
+    return text.split('\n\n').filter(p => p.trim()).map(para => {
+      const key = () => Math.random().toString(36).slice(2);
+      const trimmed = para.trim();
+
+      if (trimmed.startsWith('## ')) {
+        return { _type: 'block', _key: key(), style: 'h2', markDefs: [],
+          children: [{ _type: 'span', _key: key(), text: trimmed.slice(3), marks: [] }] };
+      }
+      if (trimmed.startsWith('> ')) {
+        return { _type: 'block', _key: key(), style: 'blockquote', markDefs: [],
+          children: [{ _type: 'span', _key: key(), text: trimmed.slice(2), marks: [] }] };
+      }
+
+      // Parse inline marks (bold, italic)
+      const children = [];
+      let rest = trimmed;
+      const inlineRe = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+      let lastIdx = 0, m;
+      while ((m = inlineRe.exec(rest)) !== null) {
+        if (m.index > lastIdx) children.push({ _type: 'span', _key: key(), text: rest.slice(lastIdx, m.index), marks: [] });
+        if (m[2]) children.push({ _type: 'span', _key: key(), text: m[2], marks: ['strong'] });
+        else if (m[3]) children.push({ _type: 'span', _key: key(), text: m[3], marks: ['em'] });
+        lastIdx = m.index + m[0].length;
+      }
+      if (lastIdx < rest.length) children.push({ _type: 'span', _key: key(), text: rest.slice(lastIdx), marks: [] });
+
+      return { _type: 'block', _key: key(), style: 'normal', markDefs: [], children };
+    });
+  }
+
+  // ── LOAD POSTS ──
+  async function loadPosts() {
+    const listEl = document.getElementById('post-list');
+    listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Đang tải...</p>';
+    try {
+      const q = encodeURIComponent('*[_type == "post"] | order(publishedAt desc) { _id, title, slug, publishedAt, category }');
+      const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
+      const { result } = await res.json();
+
+      if (!result?.length) {
+        listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Chưa có bài viết nào.</p>';
+        return;
+      }
+
+      listEl.innerHTML = result.map(p => `
+        <div class="flex items-center justify-between border border-white/10 px-4 py-4 hover:border-white/20 transition-colors group">
+          <div class="flex-1 min-w-0 mr-4">
+            <p class="text-[14px] text-white/90 truncate">${p.title}</p>
+            <p class="text-[11px] font-mono text-white/30 mt-0.5">
+              ${p.category ?? '—'} · ${p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('vi-VN') : ''}
+            </p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <button data-id="${p._id}" class="edit-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold transition-colors">Sửa</button>
+            <a href="/blog/${p.slug?.current}" target="_blank"
+               class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold no-underline transition-colors">Xem</a>
+            <button data-id="${p._id}" class="delete-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-red-400 transition-colors">Xóa</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Edit buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => loadForEdit(btn.dataset.id));
+      });
+
+      // Delete buttons
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => confirmDelete(btn.dataset.id));
+      });
+
+    } catch {
+      listEl.innerHTML = '<p class="text-red-400 text-[13px] font-mono">Không tải được danh sách.</p>';
+    }
+  }
+
+  // ── EDIT ──
+  async function loadForEdit(id) {
+    const q = encodeURIComponent(`*[_id == "${id}"][0]`);
+    const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
+    const { result: p } = await res.json();
+    if (!p) return;
+
+    document.getElementById('edit-id').value         = p._id;
+    document.getElementById('f-title').value         = p.title ?? '';
+    document.getElementById('f-slug').value          = p.slug?.current ?? '';
+    document.getElementById('f-excerpt').value       = p.excerpt ?? '';
+    document.getElementById('f-category').value      = p.category ?? '';
+    document.getElementById('f-author').value        = p.author ?? 'NEXT 1 Team';
+    document.getElementById('f-body').value          = blocksToText(p.body ?? []);
+    document.getElementById('form-heading').textContent = 'Chỉnh sửa bài viết';
+    document.getElementById('submit-btn').textContent   = 'Lưu thay đổi';
+    document.getElementById('cancel-edit').classList.remove('hidden');
+
+    // Switch to write tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+    document.querySelectorAll('[data-tab="write"]').forEach(b => b.classList.add('active-tab'));
+    document.getElementById('tab-write').classList.remove('hidden');
+    document.getElementById('tab-posts').classList.add('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  function blocksToText(blocks) {
+    return blocks.map(b => {
+      if (b.style === 'h2') return `## ${b.children?.map(c => c.text).join('')}`;
+      if (b.style === 'blockquote') return `> ${b.children?.map(c => c.text).join('')}`;
+      return b.children?.map(c => {
+        if (c.marks?.includes('strong')) return `**${c.text}**`;
+        if (c.marks?.includes('em'))     return `*${c.text}*`;
+        return c.text;
+      }).join('') ?? '';
+    }).join('\n\n');
+  }
+
+  document.getElementById('cancel-edit').addEventListener('click', resetForm);
+
+  function resetForm() {
+    document.getElementById('post-form').reset();
+    document.getElementById('edit-id').value              = '';
+    document.getElementById('f-author').value             = 'NEXT 1 Team';
+    document.getElementById('form-heading').textContent   = 'Viết bài mới';
+    document.getElementById('submit-btn').textContent     = 'Đăng bài';
+    document.getElementById('cancel-edit').classList.add('hidden');
+    document.getElementById('form-success').classList.add('hidden');
+  }
+
+  // ── DELETE ──
+  let deleteTargetId = null;
+  function confirmDelete(id) {
+    deleteTargetId = id;
+    document.getElementById('delete-modal').classList.remove('hidden');
+  }
+  document.getElementById('cancel-delete').addEventListener('click', () => {
+    document.getElementById('delete-modal').classList.add('hidden');
+    deleteTargetId = null;
+  });
+  document.getElementById('confirm-delete').addEventListener('click', async () => {
+    if (!deleteTargetId) return;
+    await fetch(`${API}/mutate/${DATASET}`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify({ mutations: [{ delete: { id: deleteTargetId } }] }),
+    });
+    document.getElementById('delete-modal').classList.add('hidden');
+    deleteTargetId = null;
+    loadPosts();
+  });
+</script>
 
 </body>
 </html>
