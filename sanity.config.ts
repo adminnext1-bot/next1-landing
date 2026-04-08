@@ -3,9 +3,8 @@ import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './schemas';
 
-// Load from .env — fill in SANITY_PROJECT_ID before running
-const projectId = process.env.SANITY_PROJECT_ID ?? '';
-const dataset   = process.env.SANITY_DATASET   ?? 'production';
+const projectId = '71o95mt5';
+const dataset   = 'production';
 
 export default defineConfig({
   name:    'next1-studio',
