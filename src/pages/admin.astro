@@ -581,14 +581,16 @@ Xuống 1 dòng trống = đoạn văn mới
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ topic, category, length }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      aiResult = await res.json();
+      const resText = await res.text();
+      if (!res.ok) throw new Error(`${res.status}: ${resText}`);
+      aiResult = JSON.parse(resText);
 
-      document.getElementById('ai-prev-title').textContent  = aiResult.title   ?? '';
+      document.getElementById('ai-prev-title').textContent   = aiResult.title   ?? '';
       document.getElementById('ai-prev-excerpt').textContent = aiResult.excerpt ?? '';
-      document.getElementById('ai-prev-body').textContent   = aiResult.body    ?? '';
+      document.getElementById('ai-prev-body').textContent    = aiResult.body    ?? '';
       preview.classList.remove('hidden');
-    } catch {
+    } catch (err) {
+      errEl.textContent = 'Lỗi: ' + (err?.message ?? String(err));
       errEl.classList.remove('hidden');
     } finally {
       btn.disabled    = false;
