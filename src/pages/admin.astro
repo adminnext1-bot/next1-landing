@@ -1,8 +1,9 @@
 ---
 import '../styles/global.css';
-const PROJECT_ID = import.meta.env.SANITY_PROJECT_ID;
-const DATASET    = import.meta.env.SANITY_DATASET ?? 'production';
-const TOKEN      = import.meta.env.SANITY_TOKEN;
+const PROJECT_ID = import.meta.env.SANITY_PROJECT_ID ?? '';
+const DATASET    = import.meta.env.SANITY_DATASET   ?? 'production';
+const TOKEN      = import.meta.env.SANITY_TOKEN      ?? '';
+const HAS_TOKEN  = TOKEN.length > 0;
 ---
 
 <!doctype html>
@@ -55,9 +56,15 @@ const TOKEN      = import.meta.env.SANITY_TOKEN;
           📋 Quản lý bài viết
         </button>
       </nav>
-      <div class="px-6 py-4 border-t border-white/10">
+      <div class="px-4 py-4 border-t border-white/10 flex flex-col gap-1.5">
+        <p class={`font-mono text-[9px] tracking-[0.2em] ${HAS_TOKEN ? 'text-emerald-400' : 'text-red-400'}`}>
+          {HAS_TOKEN ? '✓ Sanity OK' : '✗ Thiếu token'}
+        </p>
+        <p class={`font-mono text-[9px] tracking-[0.2em] ${PROJECT_ID ? 'text-emerald-400' : 'text-red-400'}`}>
+          {PROJECT_ID ? `✓ Project: ${PROJECT_ID}` : '✗ Thiếu Project ID'}
+        </p>
         <a href="/blog" target="_blank"
-          class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 hover:text-gold no-underline transition-colors">
+          class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 hover:text-gold no-underline transition-colors mt-2">
           Xem Blog →
         </a>
       </div>
