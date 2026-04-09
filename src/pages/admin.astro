@@ -46,6 +46,10 @@ const TOKEN      = import.meta.env.SANITY_TOKEN;
           class="tab-btn active-tab text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors">
           ✏️ Viết bài mới
         </button>
+        <button data-tab="ai"
+          class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
+          🤖 AI Viết bài
+        </button>
         <button data-tab="posts"
           class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
           📋 Quản lý bài viết
@@ -172,6 +176,103 @@ Xuống 1 dòng trống = đoạn văn mới
         </form>
       </div>
 
+      <!-- ── TAB: AI ── -->
+      <div id="tab-ai" class="hidden">
+        <div class="mb-8">
+          <h2 class="font-serif text-2xl font-bold">AI Viết bài</h2>
+          <p class="text-white/40 text-[13px] mt-1">Claude AI sẽ tự động tạo bài viết hoàn chỉnh theo chủ đề bạn nhập.</p>
+        </div>
+
+        <form id="ai-form" class="flex flex-col gap-5">
+          <!-- Topic -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Chủ đề bài viết *</label>
+            <input id="ai-topic" type="text" required
+              placeholder="VD: Cách quản lý rủi ro khi giao dịch Forex..."
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+          </div>
+
+          <!-- Category + Length -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Danh mục</label>
+              <div class="relative">
+                <select id="ai-category"
+                  class="w-full bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                         focus:outline-none focus:border-gold/60 appearance-none cursor-pointer">
+                  <option value="Phân tích thị trường">Phân tích thị trường</option>
+                  <option value="Chiến lược giao dịch">Chiến lược giao dịch</option>
+                  <option value="Tư duy đầu tư" selected>Tư duy đầu tư</option>
+                  <option value="Giáo dục tài chính">Giáo dục tài chính</option>
+                  <option value="Tin tức & Cập nhật">Tin tức & Cập nhật</option>
+                </select>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gold/60 pointer-events-none text-[10px]">▼</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Độ dài</label>
+              <div class="relative">
+                <select id="ai-length"
+                  class="w-full bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                         focus:outline-none focus:border-gold/60 appearance-none cursor-pointer">
+                  <option value="short">Ngắn (~400 từ)</option>
+                  <option value="medium" selected>Trung bình (~700 từ)</option>
+                  <option value="long">Dài (~1400 từ)</option>
+                </select>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gold/60 pointer-events-none text-[10px]">▼</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generate button -->
+          <button id="ai-btn" type="submit"
+            class="py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
+                   hover:bg-gold-light transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            Tạo bài viết
+          </button>
+        </form>
+
+        <!-- Preview -->
+        <div id="ai-preview" class="hidden mt-8 flex flex-col gap-5">
+          <hr class="border-white/10" />
+          <div class="flex items-center justify-between">
+            <h3 class="font-serif text-lg font-bold">Xem trước bài viết</h3>
+            <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-emerald-400">✓ AI đã tạo xong</span>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <div class="bg-ink-2 border border-white/10 px-4 py-3">
+              <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30 mb-1">Tiêu đề</p>
+              <p id="ai-prev-title" class="text-[15px] font-semibold text-white/90"></p>
+            </div>
+            <div class="bg-ink-2 border border-white/10 px-4 py-3">
+              <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30 mb-1">Tóm tắt</p>
+              <p id="ai-prev-excerpt" class="text-[13px] text-white/60"></p>
+            </div>
+            <div class="bg-ink-2 border border-white/10 px-4 py-3 max-h-48 overflow-y-auto">
+              <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30 mb-2">Nội dung</p>
+              <pre id="ai-prev-body" class="text-[12px] text-white/60 font-mono whitespace-pre-wrap leading-relaxed"></pre>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button id="ai-use-btn"
+              class="flex-1 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
+                     hover:bg-gold-light transition-all duration-300">
+              Dùng bài này → Viết bài
+            </button>
+            <button id="ai-retry-btn"
+              class="px-6 py-4 border border-white/20 text-white/60 text-[12px] tracking-[0.1em] uppercase
+                     hover:border-white/40 hover:text-white transition-all duration-300">
+              Tạo lại
+            </button>
+          </div>
+        </div>
+
+        <p id="ai-error" class="hidden mt-4 text-center text-red-400 text-[13px]">Có lỗi xảy ra. Thử lại.</p>
+      </div>
+
       <!-- ── TAB: POSTS ── -->
       <div id="tab-posts" class="hidden">
         <div class="flex items-center justify-between mb-8">
@@ -236,11 +337,11 @@ Xuống 1 dòng trống = đoạn văn mới
   }
 
   // ── TABS ──
+  const TABS = ['write', 'ai', 'posts'];
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
-      document.getElementById('tab-write').classList.toggle('hidden', tab !== 'write');
-      document.getElementById('tab-posts').classList.toggle('hidden', tab !== 'posts');
+      TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tab));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
       document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => b.classList.add('active-tab'));
       if (tab === 'posts') loadPosts();
@@ -455,6 +556,71 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('cancel-edit').classList.add('hidden');
     document.getElementById('form-success').classList.add('hidden');
   }
+
+  // ── AI TAB ──
+  let aiResult = null;
+
+  document.getElementById('ai-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn     = document.getElementById('ai-btn');
+    const errEl   = document.getElementById('ai-error');
+    const preview = document.getElementById('ai-preview');
+
+    btn.disabled    = true;
+    btn.textContent = 'Đang tạo bài...';
+    preview.classList.add('hidden');
+    errEl.classList.add('hidden');
+
+    const topic    = document.getElementById('ai-topic').value.trim();
+    const category = document.getElementById('ai-category').value;
+    const length   = document.getElementById('ai-length').value;
+
+    try {
+      const res = await fetch('/api/generate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ topic, category, length }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      aiResult = await res.json();
+
+      document.getElementById('ai-prev-title').textContent  = aiResult.title   ?? '';
+      document.getElementById('ai-prev-excerpt').textContent = aiResult.excerpt ?? '';
+      document.getElementById('ai-prev-body').textContent   = aiResult.body    ?? '';
+      preview.classList.remove('hidden');
+    } catch {
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Tạo bài viết';
+    }
+  });
+
+  document.getElementById('ai-retry-btn').addEventListener('click', () => {
+    document.getElementById('ai-form').dispatchEvent(new Event('submit', { cancelable: true }));
+  });
+
+  document.getElementById('ai-use-btn').addEventListener('click', () => {
+    if (!aiResult) return;
+    document.getElementById('f-title').value   = aiResult.title   ?? '';
+    document.getElementById('f-excerpt').value = aiResult.excerpt ?? '';
+    document.getElementById('f-body').value    = aiResult.body    ?? '';
+    document.getElementById('f-slug').value    = slugify(aiResult.title ?? '');
+    // Find matching category
+    const catEl = document.getElementById('f-category');
+    for (const opt of catEl.options) {
+      if (opt.value === document.getElementById('ai-category').value) {
+        catEl.value = opt.value; break;
+      }
+    }
+    // Switch to write tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+    document.querySelectorAll('[data-tab="write"]').forEach(b => b.classList.add('active-tab'));
+    document.getElementById('tab-ai').classList.add('hidden');
+    document.getElementById('tab-write').classList.remove('hidden');
+    document.getElementById('tab-posts').classList.add('hidden');
+    window.scrollTo(0, 0);
+  });
 
   // ── DELETE ──
   let deleteTargetId = null;
