@@ -313,41 +313,98 @@ Xuống 1 dòng trống = đoạn văn mới
           </button>
         </form>
 
-        <!-- Preview -->
-        <div id="ai-preview" class="hidden mt-8 flex flex-col gap-5">
+        <!-- AI Result -->
+        <div id="ai-preview" class="hidden mt-8 flex flex-col gap-6">
           <hr class="border-white/10" />
+
+          <!-- Header -->
           <div class="flex items-center justify-between">
-            <h3 class="font-serif text-lg font-bold">Xem trước bài viết</h3>
+            <h3 class="font-serif text-lg font-bold">Kết quả AI</h3>
             <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-emerald-400">✓ AI đã tạo xong</span>
           </div>
 
+          <!-- Title + Excerpt -->
           <div class="flex flex-col gap-3">
             <div class="bg-ink-2 border border-white/10 px-4 py-3">
               <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30 mb-1">Tiêu đề</p>
-              <p id="ai-prev-title" class="text-[15px] font-semibold text-white/90"></p>
+              <p id="ai-prev-title" class="font-serif text-[18px] font-bold text-white leading-snug"></p>
             </div>
             <div class="bg-ink-2 border border-white/10 px-4 py-3">
               <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30 mb-1">Tóm tắt</p>
-              <p id="ai-prev-excerpt" class="text-[13px] text-white/60"></p>
-            </div>
-            <div class="bg-ink-2 border border-white/10 px-4 py-3 max-h-48 overflow-y-auto">
-              <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30 mb-2">Nội dung</p>
-              <pre id="ai-prev-body" class="text-[12px] text-white/60 font-mono whitespace-pre-wrap leading-relaxed"></pre>
+              <p id="ai-prev-excerpt" class="text-[14px] text-white/60 leading-relaxed"></p>
             </div>
           </div>
 
+          <!-- Rendered body preview -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-white/30">Nội dung bài viết</p>
+              <button id="ai-fullpreview-btn" type="button"
+                class="font-mono text-[10px] tracking-[0.2em] uppercase text-gold hover:text-gold-light transition-colors">
+                👁 Xem bài hoàn chỉnh
+              </button>
+            </div>
+            <div class="border border-white/10 px-5 py-5 max-h-72 overflow-y-auto prose-next1 text-[14px]">
+              <div id="ai-prev-body"></div>
+            </div>
+          </div>
+
+          <!-- AI Image generation -->
+          <div class="flex flex-col gap-3 border border-gold/20 bg-gold/[0.03] p-4">
+            <div class="flex items-center justify-between">
+              <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold">✨ DALL-E 3 — Tạo ảnh bìa</p>
+              <span class="font-mono text-[10px] text-white/30">Tuỳ chọn</span>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[9px] tracking-[0.25em] uppercase text-white/30">Prompt (có thể chỉnh sửa)</label>
+              <textarea id="ai-tab-image-prompt" rows="4"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[13px] text-white/80 font-mono leading-relaxed
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/40 resize-y"></textarea>
+            </div>
+            <div class="flex gap-3 items-center">
+              <button id="ai-tab-image-generate" type="button"
+                class="px-5 py-2.5 bg-gold text-ink text-[11px] font-semibold tracking-[0.15em] uppercase
+                       hover:bg-gold-light transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                Tạo ảnh
+              </button>
+              <button id="ai-tab-image-regen" type="button"
+                class="hidden px-4 py-2.5 border border-white/20 text-white/50 text-[11px] font-mono tracking-widest uppercase
+                       hover:border-white/40 hover:text-white transition-colors">
+                Tạo lại
+              </button>
+              <span id="ai-tab-image-status" class="font-mono text-[11px] text-white/40"></span>
+            </div>
+            <div id="ai-tab-image-result" class="hidden flex flex-col gap-3">
+              <img id="ai-tab-image-out" src="" alt="Generated"
+                class="w-full aspect-[16/9] object-cover border border-white/10" />
+              <label class="flex items-center gap-2.5 cursor-pointer">
+                <input id="ai-tab-image-use" type="checkbox" class="w-4 h-4 accent-gold" />
+                <span class="font-mono text-[11px] text-white/60 tracking-[0.15em] uppercase">Dùng ảnh này khi đăng bài</span>
+              </label>
+            </div>
+            <p id="ai-tab-image-error" class="hidden text-red-400 text-[12px] font-mono"></p>
+          </div>
+
+          <!-- Action buttons -->
           <div class="flex gap-3">
-            <button id="ai-use-btn"
+            <button id="ai-publish-btn" type="button"
               class="flex-1 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
                      hover:bg-gold-light transition-all duration-300">
-              Dùng bài này → Viết bài
+              Đăng bài ngay
             </button>
-            <button id="ai-retry-btn"
-              class="px-6 py-4 border border-white/20 text-white/60 text-[12px] tracking-[0.1em] uppercase
+            <button id="ai-use-btn" type="button"
+              class="px-5 py-4 border border-white/20 text-white/60 text-[12px] tracking-[0.1em] uppercase
+                     hover:border-white/40 hover:text-white transition-all duration-300">
+              → Chỉnh sửa
+            </button>
+            <button id="ai-retry-btn" type="button"
+              class="px-5 py-4 border border-white/20 text-white/60 text-[12px] tracking-[0.1em] uppercase
                      hover:border-white/40 hover:text-white transition-all duration-300">
               Tạo lại
             </button>
           </div>
+          <p id="ai-publish-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Đã đăng! Blog đang rebuild (~1 phút).</p>
+          <p id="ai-publish-error"   class="hidden text-center text-red-400 text-[14px] py-2"></p>
         </div>
 
         <p id="ai-error" class="hidden mt-4 text-center text-red-400 text-[13px]">Có lỗi xảy ra. Thử lại.</p>
@@ -771,6 +828,11 @@ Xuống 1 dòng trống = đoạn văn mới
     }
 
     document.getElementById('prev-body').innerHTML = markdownToHtml(bodyText);
+    // Ensure publish button wired to write form
+    document.getElementById('preview-publish-btn').onclick = () => {
+      document.getElementById('preview-modal').classList.add('hidden');
+      submitPost();
+    };
     document.getElementById('preview-modal').classList.remove('hidden');
     document.getElementById('preview-modal').scrollTop = 0;
   });
@@ -779,10 +841,10 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('preview-modal').classList.add('hidden');
   });
 
-  document.getElementById('preview-publish-btn').addEventListener('click', () => {
+  document.getElementById('preview-publish-btn').onclick = () => {
     document.getElementById('preview-modal').classList.add('hidden');
     submitPost();
-  });
+  };
 
   // ── LOAD POSTS ──
   let allPosts = [];
@@ -938,6 +1000,8 @@ Xuống 1 dòng trống = đoạn văn mới
     btn.textContent = 'Đang tạo bài...';
     preview.classList.add('hidden');
     errEl.classList.add('hidden');
+    document.getElementById('ai-publish-success').classList.add('hidden');
+    document.getElementById('ai-publish-error').classList.add('hidden');
 
     const topic    = document.getElementById('ai-topic').value.trim();
     const category = document.getElementById('ai-category').value;
@@ -955,8 +1019,18 @@ Xuống 1 dòng trống = đoạn văn mới
 
       document.getElementById('ai-prev-title').textContent   = aiResult.title   ?? '';
       document.getElementById('ai-prev-excerpt').textContent = aiResult.excerpt ?? '';
-      document.getElementById('ai-prev-body').textContent    = aiResult.body    ?? '';
+      // Render markdown body as HTML
+      document.getElementById('ai-prev-body').innerHTML = markdownToHtml(aiResult.body ?? '');
+      // Auto-fill image prompt from generated title + category
+      document.getElementById('ai-tab-image-prompt').value = buildImagePrompt(aiResult.title ?? topic, category);
+      // Reset image state
+      document.getElementById('ai-tab-image-result').classList.add('hidden');
+      document.getElementById('ai-tab-image-regen').classList.add('hidden');
+      document.getElementById('ai-tab-image-status').textContent = '';
+      document.getElementById('ai-tab-image-use').checked = false;
+
       preview.classList.remove('hidden');
+      preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
       errEl.textContent = 'Lỗi: ' + (err?.message ?? String(err));
       errEl.classList.remove('hidden');
@@ -970,24 +1044,158 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('ai-form').dispatchEvent(new Event('submit', { cancelable: true }));
   });
 
+  // "Xem bài hoàn chỉnh" — opens preview modal with AI content
+  document.getElementById('ai-fullpreview-btn').addEventListener('click', () => {
+    if (!aiResult) return;
+    const category = document.getElementById('ai-category').value;
+    const useImg   = document.getElementById('ai-tab-image-use').checked;
+    const imgSrc   = document.getElementById('ai-tab-image-out').src;
+
+    document.getElementById('prev-title').textContent    = aiResult.title   ?? '';
+    document.getElementById('prev-excerpt').textContent  = aiResult.excerpt ?? '';
+    document.getElementById('prev-category').textContent = category || '';
+    document.getElementById('prev-author').textContent   = 'NEXT 1 Team';
+    document.getElementById('prev-date').textContent     = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' });
+    document.getElementById('prev-sep1').style.display   = category ? '' : 'none';
+    document.getElementById('prev-sep2').style.display   = '';
+    document.getElementById('prev-body').innerHTML       = markdownToHtml(aiResult.body ?? '');
+
+    if (useImg && imgSrc) {
+      document.getElementById('prev-image').src = imgSrc;
+      document.getElementById('prev-image-wrap').classList.remove('hidden');
+    } else {
+      document.getElementById('prev-image-wrap').classList.add('hidden');
+    }
+
+    document.getElementById('preview-modal').classList.remove('hidden');
+    document.getElementById('preview-modal').scrollTop = 0;
+    // Wire publish button to AI publish
+    document.getElementById('preview-publish-btn').onclick = () => {
+      document.getElementById('preview-modal').classList.add('hidden');
+      publishAiPost();
+    };
+  });
+
+  // "Đăng bài ngay" directly from AI tab
+  document.getElementById('ai-publish-btn').addEventListener('click', publishAiPost);
+
+  async function publishAiPost() {
+    if (!aiResult) return;
+    const pubBtn    = document.getElementById('ai-publish-btn');
+    const successEl = document.getElementById('ai-publish-success');
+    const errEl2    = document.getElementById('ai-publish-error');
+    pubBtn.disabled = true; pubBtn.textContent = 'Đang đăng...';
+    successEl.classList.add('hidden'); errEl2.classList.add('hidden');
+
+    try {
+      const category = document.getElementById('ai-category').value;
+      const useImg   = document.getElementById('ai-tab-image-use').checked;
+      const imgAsset = document.getElementById('ai-tab-image-out').dataset.assetId;
+      const title    = aiResult.title ?? '';
+      const slug     = slugify(title);
+      const body     = parseMarkdown(aiResult.body ?? '');
+
+      const doc = {
+        title,
+        excerpt:     aiResult.excerpt ?? '',
+        category,
+        author:      'NEXT 1 Team',
+        slug:        { _type: 'slug', current: slug },
+        publishedAt: new Date().toISOString(),
+        body,
+      };
+
+      if (useImg && imgAsset) {
+        doc.coverImage = { _type: 'image', asset: { _type: 'reference', _ref: imgAsset } };
+      }
+
+      const res = await fetch(`${API}/mutate/${DATASET}`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ mutations: [{ create: { _type: 'post', ...doc } }] }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      if (DEPLOY_HOOK) fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
+      successEl.classList.remove('hidden');
+    } catch (err) {
+      errEl2.textContent = 'Lỗi: ' + (err?.message ?? 'Thử lại.');
+      errEl2.classList.remove('hidden');
+    } finally {
+      pubBtn.disabled = false; pubBtn.textContent = 'Đăng bài ngay';
+    }
+  }
+
+  // "→ Chỉnh sửa" — transfer to write tab
   document.getElementById('ai-use-btn').addEventListener('click', () => {
     if (!aiResult) return;
+    const category = document.getElementById('ai-category').value;
+    const useImg   = document.getElementById('ai-tab-image-use').checked;
+
     document.getElementById('f-title').value   = aiResult.title   ?? '';
     document.getElementById('f-excerpt').value = aiResult.excerpt ?? '';
     document.getElementById('f-body').value    = aiResult.body    ?? '';
     document.getElementById('f-slug').value    = slugify(aiResult.title ?? '');
-    const catEl = document.getElementById('f-category');
-    for (const opt of catEl.options) {
-      if (opt.value === document.getElementById('ai-category').value) {
-        catEl.value = opt.value; break;
+    document.getElementById('f-category').value = category;
+
+    // Transfer generated image if selected
+    if (useImg) {
+      const imgSrc   = document.getElementById('ai-tab-image-out').src;
+      const assetId  = document.getElementById('ai-tab-image-out').dataset.assetId;
+      if (imgSrc) {
+        document.getElementById('image-preview').src = imgSrc;
+        document.getElementById('image-preview').classList.remove('hidden');
+        document.getElementById('image-placeholder').classList.add('hidden');
+        document.getElementById('image-clear').classList.remove('hidden');
+        document.getElementById('f-image-ref').value = assetId || '';
+        pendingImageFile = null;
       }
     }
-    // Switch to write tab
+
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
     document.querySelectorAll('[data-tab="write"]').forEach(b => b.classList.add('active-tab'));
     TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== 'write'));
     window.scrollTo(0, 0);
   });
+
+  // ── AI IMAGE IN AI TAB ──
+  async function generateAiImageInTab() {
+    const btn      = document.getElementById('ai-tab-image-generate');
+    const regenBtn = document.getElementById('ai-tab-image-regen');
+    const statusEl = document.getElementById('ai-tab-image-status');
+    const resultEl = document.getElementById('ai-tab-image-result');
+    const errEl    = document.getElementById('ai-tab-image-error');
+    const prompt   = document.getElementById('ai-tab-image-prompt').value.trim();
+    if (!prompt) return;
+
+    btn.disabled = true;
+    statusEl.textContent = 'Đang tạo ảnh (~15-30 giây)...';
+    resultEl.classList.add('hidden');
+    errEl.classList.add('hidden');
+
+    try {
+      const res  = await fetch('/api/generate-image', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi không xác định');
+
+      document.getElementById('ai-tab-image-out').src = data.url;
+      document.getElementById('ai-tab-image-out').dataset.assetId = data.assetId || '';
+      document.getElementById('ai-tab-image-use').checked = true;
+      resultEl.classList.remove('hidden');
+      regenBtn.classList.remove('hidden');
+      statusEl.textContent = '✓ Xong';
+    } catch (err) {
+      errEl.textContent = 'Lỗi: ' + err.message;
+      errEl.classList.remove('hidden');
+      statusEl.textContent = '';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('ai-tab-image-generate').addEventListener('click', generateAiImageInTab);
+  document.getElementById('ai-tab-image-regen').addEventListener('click', generateAiImageInTab);
 
   // ── DELETE ──
   let deleteTargetId = null;
