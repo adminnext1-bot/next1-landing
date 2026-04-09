@@ -15,24 +15,18 @@ export async function onRequestPost(context) {
     long:   'khoảng 1200-1500 từ, phân tích chuyên sâu',
   }[length] || 'khoảng 600-800 từ';
 
-  const prompt = `Bạn là chuyên gia tài chính và giao dịch của NEXT 1 — cộng đồng đầu tư chuyên nghiệp tại Việt Nam.
+  const prompt = `Bạn là chuyên gia tài chính của NEXT 1 — cộng đồng đầu tư chuyên nghiệp tại Việt Nam.
 
-Viết một bài blog hoàn chỉnh về chủ đề: "${topic}"
+Viết một bài blog về: "${topic}"
 Danh mục: ${category || 'Tư duy đầu tư'}
 Độ dài: ${lengthGuide}
 
-Phong cách viết:
-- Chuyên nghiệp, thực chiến, có chiều sâu
-- Ngôn ngữ tiếng Việt tự nhiên, không cứng nhắc
-- Có góc nhìn riêng, không chung chung
-- Phù hợp với nhà đầu tư Việt Nam thế hệ mới
+Phong cách: chuyên nghiệp, thực chiến, tiếng Việt tự nhiên, có góc nhìn riêng.
 
-Trả về JSON với format sau (chỉ JSON, không có text khác):
-{
-  "title": "Tiêu đề bài viết",
-  "excerpt": "Tóm tắt 1-2 câu hấp dẫn",
-  "body": "Nội dung đầy đủ dùng Markdown: ## cho tiêu đề, **text** cho in đậm, *text* cho in nghiêng, > cho trích dẫn, hai dòng trống giữa các đoạn"
-}`;
+QUAN TRỌNG: Chỉ trả về JSON thuần túy, KHÔNG có markdown, KHÔNG có \`\`\`json, KHÔNG có text khác ngoài JSON.
+
+Format JSON:
+{"title":"tiêu đề","excerpt":"tóm tắt 1-2 câu","body":"nội dung dùng markdown"}`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -43,7 +37,7 @@ Trả về JSON với format sau (chỉ JSON, không có text khác):
     },
     body: JSON.stringify({
       model:      'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
@@ -54,14 +48,27 @@ Trả về JSON với format sau (chỉ JSON, không có text khác):
   }
 
   const data = await res.json();
-  const text = data.content?.[0]?.text ?? '';
+  let text = data.content?.[0]?.text ?? '';
+
+  // Strip markdown code fences if present
+  text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
 
   try {
-    const json = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? text);
+    const json = JSON.parse(text);
     return new Response(JSON.stringify(json), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch {
-    return new Response(JSON.stringify({ error: 'Parse error', raw: text }), { status: 500 });
+    // Try extracting JSON object from text
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        const json = JSON.parse(match[0]);
+        return new Response(JSON.stringify(json), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch {}
+    }
+    return new Response(JSON.stringify({ error: 'Parse error', raw: text.slice(0, 300) }), { status: 500 });
   }
 }
