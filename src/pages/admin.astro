@@ -126,6 +126,50 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
             </div>
             <div id="image-upload-status" class="hidden font-mono text-[10px] text-white/40">Đang tải ảnh lên...</div>
             <input id="f-image-ref" type="hidden" value="" />
+            <!-- AI Generate Image button -->
+            <button id="ai-image-btn" type="button"
+              class="flex items-center gap-2 w-fit font-mono text-[11px] tracking-[0.2em] uppercase
+                     text-white/40 hover:text-gold transition-colors mt-1">
+              ✨ AI tạo ảnh từ tiêu đề
+            </button>
+          </div>
+
+          <!-- AI Image Panel (inline, toggles) -->
+          <div id="ai-image-panel" class="hidden flex flex-col gap-3 border border-gold/20 bg-gold/[0.03] p-4">
+            <div class="flex items-center justify-between">
+              <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold">✨ DALL-E 3 — Tạo ảnh bìa</p>
+              <button id="ai-image-close" type="button" class="font-mono text-[10px] text-white/30 hover:text-white transition-colors">✕ Đóng</button>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[9px] tracking-[0.25em] uppercase text-white/30">Prompt (có thể chỉnh sửa)</label>
+              <textarea id="ai-image-prompt" rows="5"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[13px] text-white/80 font-mono leading-relaxed
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/40 resize-y"></textarea>
+            </div>
+            <div class="flex gap-3 items-center">
+              <button id="ai-image-generate" type="button"
+                class="px-5 py-2.5 bg-gold text-ink text-[11px] font-semibold tracking-[0.15em] uppercase
+                       hover:bg-gold-light transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                Tạo ảnh
+              </button>
+              <button id="ai-image-regen" type="button"
+                class="hidden px-4 py-2.5 border border-white/20 text-white/50 text-[11px] font-mono tracking-widest uppercase
+                       hover:border-white/40 hover:text-white transition-colors">
+                Tạo lại
+              </button>
+              <span id="ai-image-status" class="font-mono text-[11px] text-white/40"></span>
+            </div>
+            <!-- Generated image preview -->
+            <div id="ai-image-result" class="hidden flex flex-col gap-3">
+              <img id="ai-image-out" src="" alt="Generated"
+                class="w-full aspect-[16/9] object-cover border border-white/10" />
+              <button id="ai-image-use" type="button"
+                class="w-full py-3 border border-gold/40 text-gold text-[11px] font-mono tracking-[0.2em] uppercase
+                       hover:bg-gold/10 transition-all duration-300">
+                ✓ Dùng ảnh này làm ảnh bìa
+              </button>
+            </div>
+            <p id="ai-image-error" class="hidden text-red-400 text-[12px] font-mono"></p>
           </div>
 
           <!-- Category + Author -->
@@ -964,6 +1008,111 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('delete-modal').classList.add('hidden');
     deleteTargetId = null;
     loadPosts();
+  });
+
+  // ── AI IMAGE GENERATION ──
+  const CATEGORIES_VI = {
+    'Phân tích thị trường': 'financial market analysis, stock charts, candlestick patterns',
+    'Chiến lược giao dịch': 'trading strategy, financial charts, market execution',
+    'Tư duy đầu tư':        'investment mindset, wealth building, financial philosophy',
+    'Giáo dục tài chính':   'financial education, learning, knowledge growth',
+    'Tin tức & Cập nhật':   'financial news, market updates, data streams',
+  };
+
+  function buildImagePrompt(title, category) {
+    const catHint = CATEGORIES_VI[category] || 'financial investment, trading';
+    return `Cinematic blog cover image for NEXT 1 — a professional Vietnamese investment community.
+
+Topic: "${title}"
+Theme: ${catHint}
+
+Visual requirements:
+- Dark luxury aesthetic with near-black background (#080808)
+- Gold metallic accents and lighting (#C9A84C)
+- Abstract financial motifs: candlestick charts, glowing market data, geometric patterns, flowing light trails
+- Dramatic cinematic side-lighting with depth and atmosphere
+- Clean minimalist composition with strong visual hierarchy
+- Wide 16:9 landscape format
+
+Do NOT include: text, letters, logos, numbers, human faces, watermarks.`;
+  }
+
+  document.getElementById('ai-image-btn').addEventListener('click', () => {
+    const panel = document.getElementById('ai-image-panel');
+    const isHidden = panel.classList.contains('hidden');
+    if (isHidden) {
+      // Auto-fill prompt from current title + category
+      const title    = document.getElementById('f-title').value.trim();
+      const category = document.getElementById('f-category').value;
+      document.getElementById('ai-image-prompt').value = buildImagePrompt(title || 'Investment insights', category);
+      panel.classList.remove('hidden');
+    } else {
+      panel.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('ai-image-close').addEventListener('click', () => {
+    document.getElementById('ai-image-panel').classList.add('hidden');
+  });
+
+  async function generateAiImage() {
+    const btn      = document.getElementById('ai-image-generate');
+    const regenBtn = document.getElementById('ai-image-regen');
+    const statusEl = document.getElementById('ai-image-status');
+    const resultEl = document.getElementById('ai-image-result');
+    const errEl    = document.getElementById('ai-image-error');
+    const prompt   = document.getElementById('ai-image-prompt').value.trim();
+
+    if (!prompt) return;
+
+    btn.disabled = true;
+    statusEl.textContent = 'Đang tạo ảnh (~15-30 giây)...';
+    resultEl.classList.add('hidden');
+    errEl.classList.add('hidden');
+
+    try {
+      const res = await fetch('/api/generate-image', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi không xác định');
+
+      document.getElementById('ai-image-out').src = data.url;
+      document.getElementById('ai-image-out').dataset.assetId  = data.assetId || '';
+      resultEl.classList.remove('hidden');
+      regenBtn.classList.remove('hidden');
+      statusEl.textContent = '✓ Xong';
+    } catch (err) {
+      errEl.textContent = 'Lỗi: ' + err.message;
+      errEl.classList.remove('hidden');
+      statusEl.textContent = '';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('ai-image-generate').addEventListener('click', generateAiImage);
+  document.getElementById('ai-image-regen').addEventListener('click', generateAiImage);
+
+  document.getElementById('ai-image-use').addEventListener('click', () => {
+    const imgEl   = document.getElementById('ai-image-out');
+    const assetId = imgEl.dataset.assetId;
+    const url     = imgEl.src;
+
+    // Set as cover image in form
+    document.getElementById('image-preview').src = url;
+    document.getElementById('image-preview').classList.remove('hidden');
+    document.getElementById('image-placeholder').classList.add('hidden');
+    document.getElementById('image-clear').classList.remove('hidden');
+    document.getElementById('f-image-ref').value = assetId;
+    pendingImageFile = null; // Already uploaded server-side
+
+    document.getElementById('ai-image-panel').classList.add('hidden');
+    document.getElementById('ai-image-status').textContent = '';
+    document.getElementById('ai-image-result').classList.add('hidden');
+    document.getElementById('ai-image-regen').classList.add('hidden');
   });
 </script>
 
