@@ -64,6 +64,12 @@ export const post = defineType({
       ],
     }),
     defineField({
+      name: 'isDraft',
+      title: 'Bài nháp',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
       name: 'body',
       title: 'Nội dung bài viết',
       type: 'array',

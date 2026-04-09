@@ -52,6 +52,10 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
           class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
           🤖 AI Viết bài
         </button>
+        <button data-tab="drafts"
+          class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
+          📝 Bài nháp <span id="draft-count-badge" class="hidden ml-1 px-1.5 py-0.5 bg-gold/20 text-gold text-[9px] font-mono rounded">0</span>
+        </button>
         <button data-tab="posts"
           class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
           📋 Quản lý bài viết
@@ -76,7 +80,10 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
 
       <!-- ── TAB: WRITE ── -->
       <div id="tab-write">
-        <h2 class="font-serif text-2xl font-bold mb-8" id="form-heading">Viết bài mới</h2>
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="font-serif text-2xl font-bold" id="form-heading">Viết bài mới</h2>
+          <span id="autosave-status" class="font-mono text-[10px] text-white/25 tracking-[0.15em]"></span>
+        </div>
 
         <form id="post-form" class="flex flex-col gap-5">
           <input id="edit-id" type="hidden" value="" />
@@ -233,11 +240,16 @@ Xuống 1 dòng trống = đoạn văn mới
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-3 mt-2">
+          <div class="flex gap-3 mt-2 flex-wrap">
             <button id="preview-btn" type="button"
-              class="px-6 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
+              class="px-5 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
                      hover:border-gold/40 hover:text-gold transition-all duration-300">
               👁 Xem trước
+            </button>
+            <button id="draft-btn" type="button"
+              class="px-5 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
+                     hover:border-white/40 hover:text-white transition-all duration-300">
+              💾 Lưu nháp
             </button>
             <button id="submit-btn" type="submit"
               class="flex-1 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
@@ -245,14 +257,15 @@ Xuống 1 dòng trống = đoạn văn mới
               Đăng bài
             </button>
             <button id="cancel-edit" type="button"
-              class="hidden px-6 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
+              class="hidden px-5 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
                      hover:border-white/40 hover:text-white transition-all duration-300">
               Hủy
             </button>
           </div>
 
-          <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Lưu thành công! Blog đang rebuild (~1 phút).</p>
-          <p id="form-error"   class="hidden text-center text-red-400 text-[14px] py-2">Có lỗi xảy ra. Thử lại.</p>
+          <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Đăng thành công! Blog đang rebuild (~1 phút).</p>
+          <p id="draft-success" class="hidden text-center text-white/50 text-[14px] py-2">💾 Đã lưu nháp.</p>
+          <p id="form-error"    class="hidden text-center text-red-400 text-[14px] py-2">Có lỗi xảy ra. Thử lại.</p>
         </form>
       </div>
 
@@ -444,6 +457,21 @@ Xuống 1 dòng trống = đoạn văn mới
         <div id="post-list" class="flex flex-col gap-3">
           <p class="text-white/30 text-[13px] font-mono">Đang tải...</p>
         </div>
+      <!-- ── TAB: DRAFTS ── -->
+      <div id="tab-drafts" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-serif text-2xl font-bold">Bài nháp</h2>
+          <button data-tab="write"
+            class="tab-btn font-mono text-[11px] tracking-[0.2em] uppercase text-gold hover:text-gold-light transition-colors">
+            + Viết bài mới
+          </button>
+        </div>
+        <p class="text-white/30 text-[13px] font-mono mb-5">Bài nháp không hiển thị trên blog. Có thể tiếp tục chỉnh sửa và đăng bất cứ lúc nào.</p>
+        <div id="draft-list" class="flex flex-col gap-3">
+          <p class="text-white/30 text-[13px] font-mono">Đang tải...</p>
+        </div>
+      </div>
+
       </div>
 
     </main>
@@ -560,6 +588,8 @@ Xuống 1 dòng trống = đoạn văn mới
       gate.style.display = 'none';
       panel.classList.remove('hidden');
       loadPosts();
+      updateDraftBadge();
+      checkAutosaveRestore();
     } else {
       document.getElementById('pwd-err').classList.remove('hidden');
       document.getElementById('pwd').value = '';
@@ -567,14 +597,15 @@ Xuống 1 dòng trống = đoạn văn mới
   }
 
   // ── TABS ──
-  const TABS = ['write', 'ai', 'posts'];
+  const TABS = ['write', 'ai', 'posts', 'drafts'];
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
       TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tab));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
       document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => b.classList.add('active-tab'));
-      if (tab === 'posts') loadPosts();
+      if (tab === 'posts')   loadPosts();
+      if (tab === 'drafts')  loadDrafts();
     });
   });
 
@@ -612,6 +643,216 @@ Xuống 1 dòng trống = đoạn văn mới
       }
     });
   });
+
+  // ── AUTO-SAVE TO LOCALSTORAGE ──
+  const AUTOSAVE_KEY = 'next1_admin_autosave';
+  let autosaveTimer  = null;
+
+  function getFormSnapshot() {
+    return {
+      title:    document.getElementById('f-title').value,
+      slug:     document.getElementById('f-slug').value,
+      excerpt:  document.getElementById('f-excerpt').value,
+      category: document.getElementById('f-category').value,
+      author:   document.getElementById('f-author').value,
+      body:     document.getElementById('f-body').value,
+      editId:   document.getElementById('edit-id').value,
+      savedAt:  new Date().toISOString(),
+    };
+  }
+
+  function triggerAutosave() {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => {
+      const snap = getFormSnapshot();
+      if (!snap.title && !snap.body) return; // Don't save empty form
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
+      const el = document.getElementById('autosave-status');
+      el.textContent = `Tự lưu lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+      setTimeout(() => { el.textContent = ''; }, 3000);
+    }, 30000); // 30 seconds
+  }
+
+  // Attach autosave triggers
+  ['f-title','f-slug','f-excerpt','f-body','f-author'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', triggerAutosave);
+  });
+  document.getElementById('f-category')?.addEventListener('change', triggerAutosave);
+
+  // Restore autosave on page load (only if not already editing)
+  function checkAutosaveRestore() {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) return;
+    try {
+      const snap = JSON.parse(raw);
+      if (!snap.title && !snap.body) return;
+      const when = new Date(snap.savedAt).toLocaleString('vi-VN');
+      const banner = document.createElement('div');
+      banner.id = 'autosave-banner';
+      banner.className = 'flex items-center justify-between gap-4 bg-gold/10 border border-gold/30 px-4 py-3 mb-6 text-[13px]';
+      banner.innerHTML = `
+        <span class="text-white/70">💾 Có bản nháp chưa lưu từ <strong class="text-white">${when}</strong></span>
+        <div class="flex gap-2 flex-shrink-0">
+          <button id="autosave-restore" class="font-mono text-[11px] tracking-[0.15em] uppercase text-gold hover:text-gold-light transition-colors">Khôi phục</button>
+          <span class="text-white/20">·</span>
+          <button id="autosave-discard" class="font-mono text-[11px] tracking-[0.15em] uppercase text-white/30 hover:text-white transition-colors">Bỏ qua</button>
+        </div>`;
+      const form = document.getElementById('post-form');
+      form.parentNode.insertBefore(banner, form);
+
+      document.getElementById('autosave-restore').addEventListener('click', () => {
+        document.getElementById('f-title').value    = snap.title    || '';
+        document.getElementById('f-slug').value     = snap.slug     || '';
+        document.getElementById('f-excerpt').value  = snap.excerpt  || '';
+        document.getElementById('f-category').value = snap.category || '';
+        document.getElementById('f-author').value   = snap.author   || 'NEXT 1 Team';
+        document.getElementById('f-body').value     = snap.body     || '';
+        if (snap.editId) document.getElementById('edit-id').value = snap.editId;
+        banner.remove();
+      });
+      document.getElementById('autosave-discard').addEventListener('click', () => {
+        localStorage.removeItem(AUTOSAVE_KEY);
+        banner.remove();
+      });
+    } catch {}
+  }
+
+  // ── SAVE DRAFT (Sanity) ──
+  document.getElementById('draft-btn').addEventListener('click', saveDraft);
+
+  async function saveDraft() {
+    const btn       = document.getElementById('draft-btn');
+    const successEl = document.getElementById('draft-success');
+    const errEl     = document.getElementById('form-error');
+    const title     = document.getElementById('f-title').value.trim();
+    if (!title) { errEl.textContent = 'Cần có tiêu đề để lưu nháp.'; errEl.classList.remove('hidden'); return; }
+
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+    successEl.classList.add('hidden'); errEl.classList.add('hidden');
+
+    try {
+      const assetId  = await uploadImageIfNeeded();
+      const editId   = document.getElementById('edit-id').value;
+      const slug     = document.getElementById('f-slug').value.trim() || slugify(title);
+      const excerpt  = document.getElementById('f-excerpt').value.trim();
+      const category = document.getElementById('f-category').value;
+      const author   = document.getElementById('f-author').value.trim();
+      const bodyText = document.getElementById('f-body').value.trim();
+      const body     = bodyText ? parseMarkdown(bodyText) : [];
+
+      const doc = {
+        title, excerpt, category, author, isDraft: true,
+        slug: { _type: 'slug', current: slug },
+        body,
+      };
+      if (assetId) doc.coverImage = { _type: 'image', asset: { _type: 'reference', _ref: assetId } };
+
+      let mutations;
+      if (editId) {
+        mutations = [{ patch: { id: editId, set: doc } }];
+      } else {
+        mutations = [{ create: { _type: 'post', ...doc } }];
+      }
+      const res = await fetch(`${API}/mutate/${DATASET}`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ mutations }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+
+      // If new draft, store its id for subsequent saves
+      if (!editId) {
+        const data = await res.json();
+        const newId = data.results?.[0]?.id;
+        if (newId) document.getElementById('edit-id').value = newId;
+      }
+
+      // Clear localStorage autosave now that it's in Sanity
+      localStorage.removeItem(AUTOSAVE_KEY);
+      successEl.classList.remove('hidden');
+      updateDraftBadge();
+    } catch (err) {
+      errEl.textContent = 'Lỗi: ' + (err?.message ?? 'Thử lại.');
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = '💾 Lưu nháp';
+    }
+  }
+
+  // ── LOAD DRAFTS ──
+  async function loadDrafts() {
+    const listEl = document.getElementById('draft-list');
+    listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Đang tải...</p>';
+    try {
+      const q = encodeURIComponent('*[_type == "post" && isDraft == true] | order(_updatedAt desc) { _id, title, slug, _updatedAt, category, author }');
+      const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
+      const { result } = await res.json();
+      const drafts = result ?? [];
+      updateDraftBadge(drafts.length);
+
+      if (!drafts.length) {
+        listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Chưa có bài nháp nào.</p>';
+        return;
+      }
+
+      listEl.innerHTML = drafts.map(p => `
+        <div class="flex items-center justify-between border border-white/10 border-l-2 border-l-gold/40 px-4 py-4 hover:border-white/20 transition-colors">
+          <div class="flex-1 min-w-0 mr-4">
+            <p class="text-[14px] text-white/90 truncate">${p.title ?? '(Chưa có tiêu đề)'}</p>
+            <div class="flex items-center gap-2 mt-0.5">
+              ${p.category ? `<span class="font-mono text-[10px] tracking-[0.2em] uppercase text-gold">${p.category}</span><span class="text-white/20 text-[10px]">·</span>` : ''}
+              <span class="font-mono text-[10px] text-white/30">Lưu lúc ${new Date(p._updatedAt).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <button data-id="${p._id}" class="draft-edit-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold transition-colors">Tiếp tục</button>
+            <button data-id="${p._id}" data-title="${(p.title ?? '').replace(/"/g,'')}" class="draft-publish-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-emerald-400 transition-colors">Đăng</button>
+            <button data-id="${p._id}" class="delete-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-red-400 transition-colors">Xóa</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.draft-edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => loadForEdit(btn.dataset.id));
+      });
+      document.querySelectorAll('.draft-publish-btn').forEach(btn => {
+        btn.addEventListener('click', () => publishDraft(btn.dataset.id));
+      });
+      document.querySelectorAll('#draft-list .delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => confirmDelete(btn.dataset.id));
+      });
+    } catch {
+      listEl.innerHTML = '<p class="text-red-400 text-[13px] font-mono">Không tải được danh sách.</p>';
+    }
+  }
+
+  async function publishDraft(id) {
+    const res = await fetch(`${API}/mutate/${DATASET}`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify({ mutations: [{ patch: { id, set: { isDraft: false, publishedAt: new Date().toISOString() } } }] }),
+    });
+    if (res.ok) {
+      if (DEPLOY_HOOK) fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
+      loadDrafts();
+    }
+  }
+
+  function updateDraftBadge(count) {
+    const badge = document.getElementById('draft-count-badge');
+    if (!badge) return;
+    if (count === undefined) {
+      // Fetch count silently
+      const q = encodeURIComponent('count(*[_type == "post" && isDraft == true])');
+      fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS })
+        .then(r => r.json()).then(d => updateDraftBadge(d.result ?? 0)).catch(() => {});
+      return;
+    }
+    if (count > 0) {
+      badge.textContent = count;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
 
   // ── IMAGE UPLOAD ──
   let pendingImageFile = null;
@@ -730,6 +971,8 @@ Xuống 1 dòng trống = đoạn văn mới
       if (DEPLOY_HOOK) {
         fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
       }
+      localStorage.removeItem(AUTOSAVE_KEY);
+      updateDraftBadge();
       // Close preview modal if open
       document.getElementById('preview-modal').classList.add('hidden');
       success.classList.remove('hidden');
@@ -975,7 +1218,11 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('submit-btn').textContent     = 'Đăng bài';
     document.getElementById('cancel-edit').classList.add('hidden');
     document.getElementById('form-success').classList.add('hidden');
+    document.getElementById('draft-success').classList.add('hidden');
     document.getElementById('form-error').classList.add('hidden');
+    localStorage.removeItem(AUTOSAVE_KEY);
+    clearTimeout(autosaveTimer);
+    document.getElementById('autosave-status').textContent = '';
     // Reset image
     pendingImageFile = null;
     document.getElementById('f-image').value = '';

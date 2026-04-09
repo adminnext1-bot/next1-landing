@@ -22,7 +22,7 @@ export type Post = {
 
 export async function getAllPosts(): Promise<Post[]> {
   return sanityClient.fetch(`
-    *[_type == "post"] | order(publishedAt desc) {
+    *[_type == "post" && isDraft != true] | order(publishedAt desc) {
       _id, title, slug, excerpt, publishedAt, category, author,
       coverImage { asset->{ url }, alt }
     }
