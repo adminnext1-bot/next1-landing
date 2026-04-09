@@ -105,6 +105,29 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
                      placeholder:text-white/20 focus:outline-none focus:border-gold/60 resize-none"></textarea>
           </div>
 
+          <!-- Cover Image Upload -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Ảnh bìa</label>
+            <div id="image-drop-zone"
+              class="relative border border-dashed border-white/20 hover:border-gold/40 transition-colors cursor-pointer overflow-hidden">
+              <input id="f-image" type="file" accept="image/*"
+                class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
+              <div id="image-placeholder" class="flex flex-col items-center justify-center py-10 gap-2 pointer-events-none">
+                <span class="text-3xl opacity-30">🖼</span>
+                <p class="font-mono text-[11px] text-white/30 tracking-[0.2em] uppercase">Click hoặc kéo thả ảnh vào đây</p>
+                <p class="font-mono text-[10px] text-white/20">JPG, PNG, WebP · Tối đa 5MB</p>
+              </div>
+              <img id="image-preview" class="hidden w-full max-h-52 object-cover" alt="Preview" />
+              <button id="image-clear" type="button"
+                class="hidden absolute top-2 right-2 z-20 bg-black/60 hover:bg-black/80 text-white text-[11px]
+                       px-2 py-1 font-mono tracking-widest transition-colors">
+                ✕ Xóa
+              </button>
+            </div>
+            <div id="image-upload-status" class="hidden font-mono text-[10px] text-white/40">Đang tải ảnh lên...</div>
+            <input id="f-image-ref" type="hidden" value="" />
+          </div>
+
           <!-- Category + Author -->
           <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
@@ -167,6 +190,11 @@ Xuống 1 dòng trống = đoạn văn mới
 
           <!-- Actions -->
           <div class="flex gap-3 mt-2">
+            <button id="preview-btn" type="button"
+              class="px-6 py-4 border border-white/20 text-white/60 text-[12px] font-medium tracking-[0.1em] uppercase
+                     hover:border-gold/40 hover:text-gold transition-all duration-300">
+              👁 Xem trước
+            </button>
             <button id="submit-btn" type="submit"
               class="flex-1 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
                      hover:bg-gold-light transition-all duration-300 disabled:opacity-50">
@@ -179,7 +207,7 @@ Xuống 1 dòng trống = đoạn văn mới
             </button>
           </div>
 
-          <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Lưu thành công!</p>
+          <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Lưu thành công! Blog đang rebuild (~1 phút).</p>
           <p id="form-error"   class="hidden text-center text-red-400 text-[14px] py-2">Có lỗi xảy ra. Thử lại.</p>
         </form>
       </div>
@@ -283,13 +311,35 @@ Xuống 1 dòng trống = đoạn văn mới
 
       <!-- ── TAB: POSTS ── -->
       <div id="tab-posts" class="hidden">
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center justify-between mb-6">
           <h2 class="font-serif text-2xl font-bold">Quản lý bài viết</h2>
           <button data-tab="write"
             class="tab-btn font-mono text-[11px] tracking-[0.2em] uppercase text-gold hover:text-gold-light transition-colors">
             + Viết bài mới
           </button>
         </div>
+
+        <!-- Filters -->
+        <div class="flex gap-3 mb-5 flex-wrap">
+          <div class="relative">
+            <select id="filter-category"
+              class="bg-ink-2 border border-white/10 pl-3 pr-8 py-2 text-[12px] text-white/60 font-mono
+                     focus:outline-none focus:border-gold/40 appearance-none cursor-pointer">
+              <option value="">Tất cả danh mục</option>
+              <option value="Phân tích thị trường">Phân tích thị trường</option>
+              <option value="Chiến lược giao dịch">Chiến lược giao dịch</option>
+              <option value="Tư duy đầu tư">Tư duy đầu tư</option>
+              <option value="Giáo dục tài chính">Giáo dục tài chính</option>
+              <option value="Tin tức & Cập nhật">Tin tức & Cập nhật</option>
+            </select>
+            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none text-[9px]">▼</span>
+          </div>
+          <input id="filter-author" type="text" placeholder="Lọc theo tác giả..."
+            class="bg-ink-2 border border-white/10 px-3 py-2 text-[12px] text-white/60 font-mono
+                   placeholder:text-white/20 focus:outline-none focus:border-gold/40 w-44" />
+          <span id="filter-count" class="font-mono text-[11px] text-white/30 self-center ml-auto"></span>
+        </div>
+
         <div id="post-list" class="flex flex-col gap-3">
           <p class="text-white/30 text-[13px] font-mono">Đang tải...</p>
         </div>
@@ -318,12 +368,83 @@ Xuống 1 dòng trống = đoạn văn mới
     </div>
   </div>
 
+  <!-- ── PREVIEW MODAL ── -->
+  <div id="preview-modal" class="hidden fixed inset-0 bg-black/80 z-50 overflow-y-auto">
+    <div class="min-h-full flex flex-col">
+      <!-- Modal header -->
+      <div class="sticky top-0 z-10 bg-ink-2/95 backdrop-blur border-b border-white/10 flex items-center justify-between px-8 py-4">
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold">Preview</span>
+          <span class="text-white/20 text-[10px]">·</span>
+          <span class="font-mono text-[10px] text-white/30">Giao diện thực tế trên blog</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="preview-publish-btn"
+            class="px-5 py-2 bg-gold text-ink text-[11px] font-semibold tracking-[0.15em] uppercase
+                   hover:bg-gold-light transition-all duration-300">
+            Đăng bài ngay
+          </button>
+          <button id="preview-close"
+            class="px-4 py-2 border border-white/20 text-white/60 text-[11px] font-mono tracking-widest uppercase
+                   hover:border-white/40 hover:text-white transition-colors">
+            ✕ Đóng
+          </button>
+        </div>
+      </div>
+
+      <!-- Mock blog post layout -->
+      <div class="flex-1 bg-ink">
+        <!-- Post header -->
+        <header class="relative border-b border-white/10 px-6 md:px-16 py-16 overflow-hidden">
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(201,168,76,0.06),transparent_70%)] pointer-events-none"></div>
+          <div class="relative z-10 max-w-3xl mx-auto">
+            <div class="flex items-center gap-3 mb-5">
+              <span id="prev-category" class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold"></span>
+              <span class="text-white/20" id="prev-sep1">·</span>
+              <span id="prev-date" class="font-mono text-[10px] tracking-[0.15em] text-white/40"></span>
+              <span class="text-white/20" id="prev-sep2">·</span>
+              <span id="prev-author" class="font-mono text-[10px] tracking-[0.15em] text-white/40"></span>
+            </div>
+            <h1 id="prev-title" class="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-[1.1] tracking-tight mb-6"></h1>
+            <p id="prev-excerpt" class="text-[17px] text-white/60 font-light leading-relaxed max-w-xl"></p>
+          </div>
+        </header>
+
+        <!-- Cover image preview -->
+        <div id="prev-image-wrap" class="hidden max-w-4xl mx-auto px-6 md:px-16 pt-12">
+          <img id="prev-image" src="" alt="" class="w-full aspect-[16/9] object-cover border border-white/10" />
+        </div>
+
+        <!-- Body -->
+        <article class="max-w-3xl mx-auto px-6 md:px-16 py-14 prose-next1">
+          <div id="prev-body"></div>
+        </article>
+      </div>
+    </div>
+  </div>
+
 <style>
   .active-tab { color: #C9A84C !important; background: rgba(201,168,76,0.08); }
+
+  /* prose styles for preview */
+  .prose-next1 { color: rgba(255,255,255,0.75); font-family: 'DM Sans', sans-serif; font-weight: 300; font-size: 16px; line-height: 1.85; }
+  .prose-next1 h2 { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3vw, 30px); font-weight: 700; color: #fff; margin-top: 2.5em; margin-bottom: 0.75em; line-height: 1.2; }
+  .prose-next1 h3 { font-family: 'Playfair Display', serif; font-size: clamp(18px, 2.5vw, 22px); font-weight: 700; color: rgba(255,255,255,0.9); margin-top: 2em; margin-bottom: 0.5em; }
+  .prose-next1 p { margin-bottom: 1.4em; }
+  .prose-next1 a { color: #C9A84C; text-decoration: underline; text-underline-offset: 3px; }
+  .prose-next1 strong { color: #fff; font-weight: 600; }
+  .prose-next1 em { font-style: italic; color: rgba(255,255,255,0.85); }
+  .prose-next1 blockquote { border-left: 2px solid #C9A84C; padding-left: 1.25rem; margin: 2em 0; color: rgba(255,255,255,0.5); font-style: italic; font-family: 'Playfair Display', serif; font-size: 1.05em; }
+  .prose-next1 ul { list-style: none; padding: 0; margin-bottom: 1.4em; }
+  .prose-next1 ul li { padding-left: 1.25em; position: relative; margin-bottom: 0.4em; }
+  .prose-next1 ul li::before { content: '—'; position: absolute; left: 0; color: #C9A84C; font-weight: 400; }
+  .prose-next1 ol { padding-left: 1.5em; margin-bottom: 1.4em; }
+  .prose-next1 ol li { margin-bottom: 0.4em; }
 </style>
 
 <script define:vars={{ PROJECT_ID, DATASET, TOKEN, DEPLOY_HOOK }}>
   const API      = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data`;
+  const ASSETS   = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/assets/images/${DATASET}`;
   const HEADERS  = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
   const PASSWORD = 'next1admin2026';
 
@@ -358,7 +479,7 @@ Xuống 1 dòng trống = đoạn văn mới
 
   // ── SLUG AUTO-GENERATE ──
   document.getElementById('f-title').addEventListener('input', e => {
-    if (document.getElementById('edit-id').value) return; // don't overwrite on edit
+    if (document.getElementById('edit-id').value) return;
     document.getElementById('f-slug').value = slugify(e.target.value);
   });
 
@@ -391,38 +512,115 @@ Xuống 1 dòng trống = đoạn văn mới
     });
   });
 
+  // ── IMAGE UPLOAD ──
+  let pendingImageFile = null;
+
+  document.getElementById('f-image').addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ảnh quá lớn (tối đa 5MB)');
+      e.target.value = '';
+      return;
+    }
+    pendingImageFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('image-preview').src = ev.target.result;
+      document.getElementById('image-preview').classList.remove('hidden');
+      document.getElementById('image-placeholder').classList.add('hidden');
+      document.getElementById('image-clear').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+    // Clear previously uploaded ref since we have a new file
+    document.getElementById('f-image-ref').value = '';
+  });
+
+  document.getElementById('image-clear').addEventListener('click', () => {
+    pendingImageFile = null;
+    document.getElementById('f-image').value = '';
+    document.getElementById('f-image-ref').value = '';
+    document.getElementById('image-preview').classList.add('hidden');
+    document.getElementById('image-preview').src = '';
+    document.getElementById('image-placeholder').classList.remove('hidden');
+    document.getElementById('image-clear').classList.add('hidden');
+  });
+
+  async function uploadImageIfNeeded() {
+    // Already uploaded (edit mode with existing image)
+    if (document.getElementById('f-image-ref').value) return document.getElementById('f-image-ref').value;
+    if (!pendingImageFile) return null;
+
+    const statusEl = document.getElementById('image-upload-status');
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = 'Đang tải ảnh lên Sanity...';
+
+    try {
+      const res = await fetch(ASSETS, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': pendingImageFile.type,
+        },
+        body: pendingImageFile,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      const assetId = data.document._id;
+      statusEl.textContent = '✓ Ảnh đã tải lên';
+      document.getElementById('f-image-ref').value = assetId;
+      return assetId;
+    } catch (err) {
+      statusEl.textContent = '✗ Lỗi tải ảnh: ' + err.message;
+      throw err;
+    }
+  }
+
   // ── SUBMIT ──
   document.getElementById('post-form').addEventListener('submit', async e => {
     e.preventDefault();
+    await submitPost();
+  });
+
+  async function submitPost() {
     const btn     = document.getElementById('submit-btn');
     const success = document.getElementById('form-success');
     const errEl   = document.getElementById('form-error');
     btn.disabled = true; btn.textContent = 'Đang lưu...';
     success.classList.add('hidden'); errEl.classList.add('hidden');
 
-    const editId   = document.getElementById('edit-id').value;
-    const title    = document.getElementById('f-title').value.trim();
-    const slug     = document.getElementById('f-slug').value.trim() || slugify(title);
-    const excerpt  = document.getElementById('f-excerpt').value.trim();
-    const category = document.getElementById('f-category').value;
-    const author   = document.getElementById('f-author').value.trim();
-    const bodyText = document.getElementById('f-body').value.trim();
-    const body     = parseMarkdown(bodyText);
-
-    const doc = {
-      title, excerpt, category, author,
-      slug: { _type: 'slug', current: slug },
-      publishedAt: new Date().toISOString(),
-      body,
-    };
-
     try {
+      const assetId = await uploadImageIfNeeded();
+      const editId   = document.getElementById('edit-id').value;
+      const title    = document.getElementById('f-title').value.trim();
+      const slug     = document.getElementById('f-slug').value.trim() || slugify(title);
+      const excerpt  = document.getElementById('f-excerpt').value.trim();
+      const category = document.getElementById('f-category').value;
+      const author   = document.getElementById('f-author').value.trim();
+      const bodyText = document.getElementById('f-body').value.trim();
+      const body     = parseMarkdown(bodyText);
+
+      const doc = {
+        title, excerpt, category, author,
+        slug: { _type: 'slug', current: slug },
+        publishedAt: new Date().toISOString(),
+        body,
+      };
+
+      if (assetId) {
+        doc.coverImage = {
+          _type: 'image',
+          asset: { _type: 'reference', _ref: assetId },
+        };
+      }
+
       let mutations;
       if (editId) {
         mutations = [{ patch: { id: editId, set: doc } }];
       } else {
         mutations = [{ create: { _type: 'post', ...doc } }];
       }
+
       const res = await fetch(`${API}/mutate/${DATASET}`, {
         method: 'POST', headers: HEADERS,
         body: JSON.stringify({ mutations }),
@@ -431,14 +629,17 @@ Xuống 1 dòng trống = đoạn văn mới
       if (DEPLOY_HOOK) {
         fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
       }
+      // Close preview modal if open
+      document.getElementById('preview-modal').classList.add('hidden');
       success.classList.remove('hidden');
       resetForm();
-    } catch {
+    } catch (err) {
+      errEl.textContent = 'Có lỗi xảy ra: ' + (err?.message ?? 'Thử lại.');
       errEl.classList.remove('hidden');
     } finally {
       btn.disabled = false; btn.textContent = 'Đăng bài';
     }
-  });
+  }
 
   // ── PARSE MARKDOWN → Sanity blocks ──
   function parseMarkdown(text) {
@@ -454,8 +655,11 @@ Xuống 1 dòng trống = đoạn văn mới
         return { _type: 'block', _key: key(), style: 'blockquote', markDefs: [],
           children: [{ _type: 'span', _key: key(), text: trimmed.slice(2), marks: [] }] };
       }
+      if (trimmed.startsWith('- ')) {
+        return { _type: 'block', _key: key(), style: 'normal', listItem: 'bullet', level: 1, markDefs: [],
+          children: [{ _type: 'span', _key: key(), text: trimmed.slice(2), marks: [] }] };
+      }
 
-      // Parse inline marks (bold, italic)
       const children = [];
       let rest = trimmed;
       const inlineRe = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
@@ -472,55 +676,143 @@ Xuống 1 dòng trống = đoạn văn mới
     });
   }
 
+  // ── MARKDOWN → HTML (for preview) ──
+  function markdownToHtml(text) {
+    if (!text) return '';
+    return text.split('\n\n').filter(p => p.trim()).map(para => {
+      const t = para.trim();
+      if (t.startsWith('## ')) return `<h2>${esc(t.slice(3))}</h2>`;
+      if (t.startsWith('> '))  return `<blockquote>${esc(t.slice(2))}</blockquote>`;
+      if (t.startsWith('- '))  return `<ul>${t.split('\n').filter(l => l.startsWith('- ')).map(l => `<li>${inlineHtml(l.slice(2))}</li>`).join('')}</ul>`;
+      return `<p>${inlineHtml(t)}</p>`;
+    }).join('\n');
+  }
+
+  function inlineHtml(str) {
+    return esc(str)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,     '<em>$1</em>');
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── PREVIEW MODAL ──
+  document.getElementById('preview-btn').addEventListener('click', () => {
+    const title    = document.getElementById('f-title').value.trim();
+    const excerpt  = document.getElementById('f-excerpt').value.trim();
+    const category = document.getElementById('f-category').value;
+    const author   = document.getElementById('f-author').value.trim();
+    const bodyText = document.getElementById('f-body').value.trim();
+    const imgSrc   = document.getElementById('image-preview').src;
+    const imgVisible = !document.getElementById('image-preview').classList.contains('hidden');
+
+    document.getElementById('prev-title').textContent   = title   || '(Chưa có tiêu đề)';
+    document.getElementById('prev-excerpt').textContent = excerpt || '';
+    document.getElementById('prev-category').textContent = category || '';
+    document.getElementById('prev-author').textContent   = author || '';
+    document.getElementById('prev-date').textContent     = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    // Show/hide separators
+    document.getElementById('prev-sep1').style.display = (category && author) ? '' : 'none';
+    document.getElementById('prev-sep2').style.display = author ? '' : 'none';
+
+    // Cover image
+    if (imgVisible && imgSrc) {
+      document.getElementById('prev-image').src = imgSrc;
+      document.getElementById('prev-image-wrap').classList.remove('hidden');
+    } else {
+      document.getElementById('prev-image-wrap').classList.add('hidden');
+    }
+
+    document.getElementById('prev-body').innerHTML = markdownToHtml(bodyText);
+    document.getElementById('preview-modal').classList.remove('hidden');
+    document.getElementById('preview-modal').scrollTop = 0;
+  });
+
+  document.getElementById('preview-close').addEventListener('click', () => {
+    document.getElementById('preview-modal').classList.add('hidden');
+  });
+
+  document.getElementById('preview-publish-btn').addEventListener('click', () => {
+    document.getElementById('preview-modal').classList.add('hidden');
+    submitPost();
+  });
+
   // ── LOAD POSTS ──
+  let allPosts = [];
+
   async function loadPosts() {
     const listEl = document.getElementById('post-list');
     listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Đang tải...</p>';
     try {
-      const q = encodeURIComponent('*[_type == "post"] | order(publishedAt desc) { _id, title, slug, publishedAt, category }');
+      const q = encodeURIComponent('*[_type == "post"] | order(publishedAt desc) { _id, title, slug, publishedAt, category, author }');
       const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
       const { result } = await res.json();
-
-      if (!result?.length) {
-        listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Chưa có bài viết nào.</p>';
-        return;
-      }
-
-      listEl.innerHTML = result.map(p => `
-        <div class="flex items-center justify-between border border-white/10 px-4 py-4 hover:border-white/20 transition-colors group">
-          <div class="flex-1 min-w-0 mr-4">
-            <p class="text-[14px] text-white/90 truncate">${p.title}</p>
-            <p class="text-[11px] font-mono text-white/30 mt-0.5">
-              ${p.category ?? '—'} · ${p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('vi-VN') : ''}
-            </p>
-          </div>
-          <div class="flex items-center gap-3 flex-shrink-0">
-            <button data-id="${p._id}" class="edit-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold transition-colors">Sửa</button>
-            <a href="/blog/${p.slug?.current}" target="_blank"
-               class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold no-underline transition-colors">Xem</a>
-            <button data-id="${p._id}" class="delete-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-red-400 transition-colors">Xóa</button>
-          </div>
-        </div>
-      `).join('');
-
-      // Edit buttons
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => loadForEdit(btn.dataset.id));
-      });
-
-      // Delete buttons
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => confirmDelete(btn.dataset.id));
-      });
-
+      allPosts = result ?? [];
+      renderPostList();
     } catch {
       listEl.innerHTML = '<p class="text-red-400 text-[13px] font-mono">Không tải được danh sách.</p>';
     }
   }
 
+  function renderPostList() {
+    const listEl   = document.getElementById('post-list');
+    const catFilter = document.getElementById('filter-category').value;
+    const authFilter = document.getElementById('filter-author').value.trim().toLowerCase();
+
+    const filtered = allPosts.filter(p => {
+      if (catFilter  && p.category !== catFilter) return false;
+      if (authFilter && !(p.author ?? '').toLowerCase().includes(authFilter)) return false;
+      return true;
+    });
+
+    document.getElementById('filter-count').textContent =
+      filtered.length === allPosts.length
+        ? `${allPosts.length} bài viết`
+        : `${filtered.length} / ${allPosts.length} bài viết`;
+
+    if (!filtered.length) {
+      listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Không có bài viết nào phù hợp.</p>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(p => `
+      <div class="flex items-center justify-between border border-white/10 px-4 py-4 hover:border-white/20 transition-colors">
+        <div class="flex-1 min-w-0 mr-4">
+          <p class="text-[14px] text-white/90 truncate">${p.title ?? ''}</p>
+          <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+            ${p.category ? `<span class="font-mono text-[10px] tracking-[0.2em] uppercase text-gold">${p.category}</span>` : ''}
+            ${p.category && p.author ? '<span class="text-white/20 text-[10px]">·</span>' : ''}
+            ${p.author ? `<span class="font-mono text-[10px] text-white/30">${p.author}</span>` : ''}
+            ${(p.category || p.author) && p.publishedAt ? '<span class="text-white/20 text-[10px]">·</span>' : ''}
+            ${p.publishedAt ? `<span class="font-mono text-[10px] text-white/30">${new Date(p.publishedAt).toLocaleDateString('vi-VN')}</span>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <button data-id="${p._id}" class="edit-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold transition-colors">Sửa</button>
+          <a href="/blog/${p.slug?.current}" target="_blank"
+             class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold no-underline transition-colors">Xem</a>
+          <button data-id="${p._id}" class="delete-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-red-400 transition-colors">Xóa</button>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => loadForEdit(btn.dataset.id));
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => confirmDelete(btn.dataset.id));
+    });
+  }
+
+  document.getElementById('filter-category').addEventListener('change', renderPostList);
+  document.getElementById('filter-author').addEventListener('input', renderPostList);
+
   // ── EDIT ──
   async function loadForEdit(id) {
-    const q = encodeURIComponent(`*[_id == "${id}"][0]`);
+    const q = encodeURIComponent(`*[_id == "${id}"][0]{ ..., "coverImageUrl": coverImage.asset->url }`);
     const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
     const { result: p } = await res.json();
     if (!p) return;
@@ -536,11 +828,21 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('submit-btn').textContent   = 'Lưu thay đổi';
     document.getElementById('cancel-edit').classList.remove('hidden');
 
+    // Restore cover image
+    if (p.coverImage?.asset?._ref) {
+      document.getElementById('f-image-ref').value = p.coverImage.asset._ref;
+    }
+    if (p.coverImageUrl) {
+      document.getElementById('image-preview').src = p.coverImageUrl;
+      document.getElementById('image-preview').classList.remove('hidden');
+      document.getElementById('image-placeholder').classList.add('hidden');
+      document.getElementById('image-clear').classList.remove('hidden');
+    }
+
     // Switch to write tab
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
     document.querySelectorAll('[data-tab="write"]').forEach(b => b.classList.add('active-tab'));
-    document.getElementById('tab-write').classList.remove('hidden');
-    document.getElementById('tab-posts').classList.add('hidden');
+    TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== 'write'));
     window.scrollTo(0, 0);
   }
 
@@ -548,6 +850,7 @@ Xuống 1 dòng trống = đoạn văn mới
     return blocks.map(b => {
       if (b.style === 'h2') return `## ${b.children?.map(c => c.text).join('')}`;
       if (b.style === 'blockquote') return `> ${b.children?.map(c => c.text).join('')}`;
+      if (b.listItem === 'bullet') return `- ${b.children?.map(c => c.text).join('')}`;
       return b.children?.map(c => {
         if (c.marks?.includes('strong')) return `**${c.text}**`;
         if (c.marks?.includes('em'))     return `*${c.text}*`;
@@ -566,6 +869,16 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('submit-btn').textContent     = 'Đăng bài';
     document.getElementById('cancel-edit').classList.add('hidden');
     document.getElementById('form-success').classList.add('hidden');
+    document.getElementById('form-error').classList.add('hidden');
+    // Reset image
+    pendingImageFile = null;
+    document.getElementById('f-image').value = '';
+    document.getElementById('f-image-ref').value = '';
+    document.getElementById('image-preview').classList.add('hidden');
+    document.getElementById('image-preview').src = '';
+    document.getElementById('image-placeholder').classList.remove('hidden');
+    document.getElementById('image-clear').classList.add('hidden');
+    document.getElementById('image-upload-status').classList.add('hidden');
   }
 
   // ── AI TAB ──
@@ -619,7 +932,6 @@ Xuống 1 dòng trống = đoạn văn mới
     document.getElementById('f-excerpt').value = aiResult.excerpt ?? '';
     document.getElementById('f-body').value    = aiResult.body    ?? '';
     document.getElementById('f-slug').value    = slugify(aiResult.title ?? '');
-    // Find matching category
     const catEl = document.getElementById('f-category');
     for (const opt of catEl.options) {
       if (opt.value === document.getElementById('ai-category').value) {
@@ -629,9 +941,7 @@ Xuống 1 dòng trống = đoạn văn mới
     // Switch to write tab
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
     document.querySelectorAll('[data-tab="write"]').forEach(b => b.classList.add('active-tab'));
-    document.getElementById('tab-ai').classList.add('hidden');
-    document.getElementById('tab-write').classList.remove('hidden');
-    document.getElementById('tab-posts').classList.add('hidden');
+    TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== 'write'));
     window.scrollTo(0, 0);
   });
 
