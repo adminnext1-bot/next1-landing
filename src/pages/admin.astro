@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
-const PROJECT_ID = import.meta.env.SANITY_PROJECT_ID ?? '';
-const DATASET    = import.meta.env.SANITY_DATASET   ?? 'production';
-const TOKEN      = import.meta.env.SANITY_TOKEN      ?? '';
-const HAS_TOKEN  = TOKEN.length > 0;
+const PROJECT_ID   = import.meta.env.SANITY_PROJECT_ID ?? '';
+const DATASET      = import.meta.env.SANITY_DATASET   ?? 'production';
+const TOKEN        = import.meta.env.SANITY_TOKEN      ?? '';
+const HAS_TOKEN    = TOKEN.length > 0;
+const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/50db80aa-160a-48c9-8897-f250a5a7d545';
 ---
 
 <!doctype html>
@@ -321,7 +322,7 @@ Xuống 1 dòng trống = đoạn văn mới
   .active-tab { color: #C9A84C !important; background: rgba(201,168,76,0.08); }
 </style>
 
-<script define:vars={{ PROJECT_ID, DATASET, TOKEN }}>
+<script define:vars={{ PROJECT_ID, DATASET, TOKEN, DEPLOY_HOOK }}>
   const API      = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data`;
   const HEADERS  = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
   const PASSWORD = 'next1admin2026';
@@ -427,6 +428,9 @@ Xuống 1 dòng trống = đoạn văn mới
         body: JSON.stringify({ mutations }),
       });
       if (!res.ok) throw new Error(await res.text());
+      if (DEPLOY_HOOK) {
+        fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
+      }
       success.classList.remove('hidden');
       resetForm();
     } catch {
