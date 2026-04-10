@@ -6,6 +6,7 @@ import { getAllPosts } from '../../lib/sanity';
 import '../../styles/global.css';
 
 const posts = await getAllPosts();
+const categories = [...new Set(posts.map(p => p.category).filter(Boolean))];
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('vi-VN', {
@@ -36,8 +37,47 @@ function formatDate(iso: string) {
       </div>
     </section>
 
+    <!-- Filter bar -->
+    <section class="sticky top-[72px] z-30 border-b border-white/10 bg-ink/95 backdrop-blur-sm px-6 md:px-16 py-4">
+      <div class="max-w-6xl mx-auto flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+
+        <!-- Search -->
+        <div class="relative w-full sm:w-64 shrink-0">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-[14px] pointer-events-none">⌕</span>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Tìm bài viết..."
+            class="w-full bg-ink-2 border border-white/10 pl-9 pr-4 py-2 text-[13px] text-white/80
+                   placeholder:text-white/20 focus:outline-none focus:border-gold/50 transition-colors font-mono"
+          />
+        </div>
+
+        <!-- Category pills -->
+        <div class="flex flex-wrap gap-2 flex-1">
+          <button
+            class="cat-pill active-pill font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-1.5
+                   border border-gold/50 text-gold transition-colors"
+            data-cat="">
+            Tất cả
+          </button>
+          {categories.map(cat => (
+            <button
+              class="cat-pill font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-1.5
+                     border border-white/15 text-white/40 hover:border-white/30 hover:text-white/60 transition-colors"
+              data-cat={cat}>
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <!-- Result count -->
+        <span id="result-count" class="font-mono text-[11px] text-white/25 shrink-0"></span>
+      </div>
+    </section>
+
     <!-- Posts grid -->
-    <section class="px-6 md:px-16 py-16 md:py-24">
+    <section class="px-6 md:px-16 py-14 md:py-20">
       <div class="max-w-6xl mx-auto">
 
         {posts.length === 0 ? (
@@ -45,70 +85,88 @@ function formatDate(iso: string) {
             Chưa có bài viết nào.
           </div>
         ) : (
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post, i) => (
-              <article
-                class="reveal group border border-white/10 hover:border-gold/40 transition-colors duration-300 flex flex-col"
-                style={`animation-delay: ${i * 0.08}s`}
-              >
-                <!-- Cover image -->
-                {post.coverImage?.asset?.url ? (
-                  <div class="overflow-hidden aspect-[16/9]">
-                    <img
-                      src={post.coverImage.asset.url}
-                      alt={post.coverImage.alt ?? post.title}
-                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-100 group-hover:scale-105"
-                    />
-                  </div>
-                ) : (
-                  <div class="aspect-[16/9] bg-ink-2 border-b border-white/10 flex items-center justify-center">
-                    <span class="font-serif text-4xl text-gold/20 italic">N1</span>
-                  </div>
-                )}
-
-                <!-- Content -->
-                <div class="flex flex-col flex-1 p-6">
-                  <!-- Meta -->
-                  <div class="flex items-center gap-3 mb-4">
-                    {post.category && (
-                      <span class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold">
-                        {post.category}
-                      </span>
+          <>
+            <div id="posts-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {posts.map((post, i) => (
+                <article
+                  class="post-card reveal group border border-white/10 hover:border-gold/40 transition-colors duration-300 flex flex-col"
+                  data-title={post.title.toLowerCase()}
+                  data-excerpt={(post.excerpt ?? '').toLowerCase()}
+                  data-cat={post.category ?? ''}
+                  style={`animation-delay: ${i * 0.06}s`}
+                >
+                  <!-- Cover image -->
+                  <a href={`/blog/${post.slug.current}`} class="block overflow-hidden aspect-[16/9] shrink-0">
+                    {post.coverImage?.asset?.url ? (
+                      <img
+                        src={post.coverImage.asset.url}
+                        alt={post.coverImage.alt ?? post.title}
+                        class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-100 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div class="w-full h-full bg-ink-2 flex items-center justify-center border-b border-white/10">
+                        <span class="font-serif text-3xl text-gold/20 italic">N1</span>
+                      </div>
                     )}
-                    {post.category && post.publishedAt && (
-                      <span class="text-white/20 text-[10px]">·</span>
-                    )}
-                    {post.publishedAt && (
-                      <span class="font-mono text-[10px] tracking-[0.15em] text-white/30">
-                        {formatDate(post.publishedAt)}
-                      </span>
-                    )}
-                  </div>
-
-                  <!-- Title -->
-                  <h2 class="font-serif text-[20px] leading-tight font-bold group-hover:text-gold transition-colors duration-200 mb-3">
-                    {post.title}
-                  </h2>
-
-                  <!-- Excerpt -->
-                  {post.excerpt && (
-                    <p class="text-[14px] text-white/50 font-light leading-relaxed flex-1 mb-6">
-                      {post.excerpt}
-                    </p>
-                  )}
-
-                  <!-- Read more -->
-                  <a
-                    href={`/blog/${post.slug.current}`}
-                    class="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] uppercase text-gold
-                           no-underline hover:gap-3 transition-all duration-200"
-                  >
-                    Đọc tiếp <span>→</span>
                   </a>
-                </div>
-              </article>
-            ))}
-          </div>
+
+                  <!-- Content -->
+                  <div class="flex flex-col flex-1 p-5">
+                    <!-- Meta -->
+                    <div class="flex items-center gap-2 mb-3">
+                      {post.category && (
+                        <span class="font-mono text-[9px] tracking-[0.3em] uppercase text-gold">
+                          {post.category}
+                        </span>
+                      )}
+                      {post.category && post.publishedAt && (
+                        <span class="text-white/20 text-[9px]">·</span>
+                      )}
+                      {post.publishedAt && (
+                        <span class="font-mono text-[9px] tracking-[0.1em] text-white/30">
+                          {formatDate(post.publishedAt)}
+                        </span>
+                      )}
+                    </div>
+
+                    <!-- Title with link -->
+                    <h2 class="font-serif text-[17px] leading-snug font-bold mb-3">
+                      <a
+                        href={`/blog/${post.slug.current}`}
+                        class="text-white group-hover:text-gold transition-colors duration-200 no-underline"
+                      >
+                        {post.title}
+                      </a>
+                    </h2>
+
+                    <!-- Excerpt -->
+                    {post.excerpt && (
+                      <p class="text-[13px] text-white/45 font-light leading-relaxed flex-1 mb-5 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                    )}
+
+                    <!-- Read more -->
+                    <a
+                      href={`/blog/${post.slug.current}`}
+                      class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-gold
+                             no-underline hover:gap-3 transition-all duration-200 mt-auto"
+                    >
+                      Đọc tiếp <span>→</span>
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <!-- Empty state for filter -->
+            <div id="no-results" class="hidden text-center py-24">
+              <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-white/25">Không tìm thấy bài viết phù hợp.</p>
+              <button id="clear-filter" class="mt-4 font-mono text-[11px] tracking-[0.2em] uppercase text-gold hover:text-gold-light transition-colors">
+                Xóa bộ lọc
+              </button>
+            </div>
+          </>
         )}
 
       </div>
@@ -118,12 +176,90 @@ function formatDate(iso: string) {
   </main>
 </Layout>
 
+<style>
+  .active-pill {
+    border-color: rgba(201, 168, 76, 0.5) !important;
+    color: #C9A84C !important;
+    background: rgba(201, 168, 76, 0.06);
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
 <script>
+  // ── Reveal on scroll ──
   const observer = new IntersectionObserver(
     (entries) => entries.forEach((e) => {
       if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
     }),
-    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    { threshold: 0.05, rootMargin: '0px 0px -30px 0px' }
   );
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+  // ── Filter & Search ──
+  const searchInput  = document.getElementById('search-input') as HTMLInputElement;
+  const resultCount  = document.getElementById('result-count')!;
+  const noResults    = document.getElementById('no-results')!;
+  const clearBtn     = document.getElementById('clear-filter');
+  const cards        = document.querySelectorAll<HTMLElement>('.post-card');
+  const pills        = document.querySelectorAll<HTMLButtonElement>('.cat-pill');
+
+  let activeCat  = '';
+  let searchTerm = '';
+
+  function applyFilter() {
+    let visible = 0;
+    cards.forEach(card => {
+      const title   = card.dataset.title   ?? '';
+      const excerpt = card.dataset.excerpt ?? '';
+      const cat     = card.dataset.cat     ?? '';
+
+      const matchCat    = !activeCat  || cat === activeCat;
+      const matchSearch = !searchTerm || title.includes(searchTerm) || excerpt.includes(searchTerm);
+
+      if (matchCat && matchSearch) {
+        card.style.display = '';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    const total = cards.length;
+    resultCount.textContent = (activeCat || searchTerm)
+      ? `${visible} / ${total} bài`
+      : `${total} bài viết`;
+
+    noResults.classList.toggle('hidden', visible > 0);
+  }
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      pills.forEach(p => p.classList.remove('active-pill'));
+      pill.classList.add('active-pill');
+      activeCat = pill.dataset.cat ?? '';
+      applyFilter();
+    });
+  });
+
+  searchInput?.addEventListener('input', (e) => {
+    searchTerm = (e.target as HTMLInputElement).value.trim().toLowerCase();
+    applyFilter();
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    searchInput.value = '';
+    searchTerm = '';
+    activeCat  = '';
+    pills.forEach(p => p.classList.remove('active-pill'));
+    pills[0]?.classList.add('active-pill');
+    applyFilter();
+  });
+
+  // Init count
+  applyFilter();
 </script>
