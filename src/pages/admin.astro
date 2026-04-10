@@ -818,7 +818,7 @@ Xuống 1 dòng trống = đoạn văn mới
         btn.addEventListener('click', () => publishDraft(btn.dataset.id));
       });
       document.querySelectorAll('#draft-list .delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => confirmDelete(btn.dataset.id));
+        btn.addEventListener('click', () => confirmDelete(btn.dataset.id, 'drafts'));
       });
     } catch {
       listEl.innerHTML = '<p class="text-red-400 text-[13px] font-mono">Không tải được danh sách.</p>';
@@ -946,6 +946,7 @@ Xuống 1 dòng trống = đoạn văn mới
         title, excerpt, category, author,
         slug: { _type: 'slug', current: slug },
         publishedAt: new Date().toISOString(),
+        isDraft: false,
         body,
       };
 
@@ -1445,9 +1446,12 @@ Xuống 1 dòng trống = đoạn văn mới
   document.getElementById('ai-tab-image-regen').addEventListener('click', generateAiImageInTab);
 
   // ── DELETE ──
-  let deleteTargetId = null;
-  function confirmDelete(id) {
-    deleteTargetId = id;
+  let deleteTargetId  = null;
+  let deleteTargetTab = 'posts'; // track which tab triggered delete
+
+  function confirmDelete(id, fromTab = 'posts') {
+    deleteTargetId  = id;
+    deleteTargetTab = fromTab;
     document.getElementById('delete-modal').classList.remove('hidden');
   }
   document.getElementById('cancel-delete').addEventListener('click', () => {
@@ -1461,8 +1465,11 @@ Xuống 1 dòng trống = đoạn văn mới
       body: JSON.stringify({ mutations: [{ delete: { id: deleteTargetId } }] }),
     });
     document.getElementById('delete-modal').classList.add('hidden');
-    deleteTargetId = null;
-    loadPosts();
+    const tab = deleteTargetTab;
+    deleteTargetId  = null;
+    deleteTargetTab = 'posts';
+    if (tab === 'drafts') { loadDrafts(); updateDraftBadge(); }
+    else loadPosts();
   });
 
   // ── AI IMAGE GENERATION ──
