@@ -29,6 +29,47 @@ export async function getAllPosts(): Promise<Post[]> {
   `);
 }
 
+export type Broker = {
+  _id: string;
+  name: string;
+  slug: { current: string };
+  logo?: { asset: { url: string }; alt?: string };
+  affiliateLink?: string;
+  tagline?: string;
+  rating?: number;
+  cashbackRate?: string;
+  minDeposit?: string;
+  spread?: string;
+  leverage?: string;
+  regulation?: string;
+  pros?: string[];
+  cons?: string[];
+  featured?: boolean;
+  order?: number;
+  body?: any[];
+};
+
+export async function getAllBrokers(): Promise<Broker[]> {
+  return sanityClient.fetch(`
+    *[_type == "broker"] | order(featured desc, order asc, name asc) {
+      _id, name, slug, tagline, rating, cashbackRate, minDeposit,
+      spread, leverage, regulation, pros, cons, featured, order, affiliateLink,
+      logo { asset->{ url }, alt }
+    }
+  `);
+}
+
+export async function getBrokerBySlug(slug: string): Promise<Broker | null> {
+  return sanityClient.fetch(`
+    *[_type == "broker" && slug.current == $slug][0] {
+      _id, name, slug, tagline, rating, cashbackRate, minDeposit,
+      spread, leverage, regulation, pros, cons, featured, affiliateLink,
+      logo { asset->{ url }, alt },
+      body
+    }
+  `, { slug });
+}
+
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   return sanityClient.fetch(`
     *[_type == "post" && slug.current == $slug][0] {

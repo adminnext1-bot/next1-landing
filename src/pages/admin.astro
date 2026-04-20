@@ -60,6 +60,15 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
           class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
           📋 Quản lý bài viết
         </button>
+        <div class="h-px bg-white/10 my-1"></div>
+        <button data-tab="broker-list"
+          class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
+          🏦 Sàn đối tác
+        </button>
+        <button data-tab="broker-form"
+          class="tab-btn text-left px-3 py-2.5 text-[13px] font-medium rounded transition-colors text-white/50 hover:text-white">
+          ➕ Thêm sàn mới
+        </button>
       </nav>
       <div class="px-4 py-4 border-t border-white/10 flex flex-col gap-1.5">
         <p class={`font-mono text-[9px] tracking-[0.2em] ${HAS_TOKEN ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -71,6 +80,10 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
         <a href="/blog" target="_blank"
           class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 hover:text-gold no-underline transition-colors mt-2">
           Xem Blog →
+        </a>
+        <a href="/brokers" target="_blank"
+          class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 hover:text-gold no-underline transition-colors">
+          Xem Đối tác →
         </a>
       </div>
     </aside>
@@ -529,6 +542,150 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
         </div>
       </div>
 
+      <!-- ── TAB: BROKER LIST ── -->
+      <div id="tab-broker-list" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-serif text-2xl font-bold">Sàn đối tác</h2>
+          <button data-tab="broker-form"
+            class="tab-btn font-mono text-[11px] tracking-[0.2em] uppercase text-gold hover:text-gold-light transition-colors">
+            + Thêm sàn mới
+          </button>
+        </div>
+        <div id="broker-list" class="flex flex-col gap-3">
+          <p class="text-white/30 text-[13px] font-mono">Đang tải...</p>
+        </div>
+      </div>
+
+      <!-- ── TAB: BROKER FORM ── -->
+      <div id="tab-broker-form" class="hidden">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="font-serif text-2xl font-bold" id="broker-form-heading">Thêm sàn mới</h2>
+          <button id="broker-cancel" type="button"
+            class="hidden font-mono text-[11px] tracking-[0.2em] uppercase text-white/40 hover:text-white transition-colors">
+            Hủy chỉnh sửa
+          </button>
+        </div>
+        <form id="broker-form" class="flex flex-col gap-5">
+          <input id="broker-edit-id" type="hidden" value="" />
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Tên sàn *</label>
+              <input id="b-name" type="text" required placeholder="VD: Exness, IC Markets..."
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Đường dẫn URL</label>
+              <input id="b-slug" type="text" placeholder="tu-dong-tao-tu-ten-san"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[13px] text-white/50 font-mono
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Slogan ngắn</label>
+            <input id="b-tagline" type="text" placeholder="VD: Sàn ECN hàng đầu, spread thấp nhất thị trường"
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Link Affiliate *</label>
+            <input id="b-affiliate" type="url" placeholder="https://..."
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+          </div>
+
+          <!-- Logo upload -->
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Logo sàn</label>
+            <div class="relative border border-dashed border-white/20 hover:border-gold/40 transition-colors cursor-pointer overflow-hidden">
+              <input id="b-logo-file" type="file" accept="image/*"
+                class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
+              <div id="b-logo-placeholder" class="flex items-center justify-center py-8 gap-3 pointer-events-none">
+                <span class="text-2xl opacity-30">🖼</span>
+                <p class="font-mono text-[11px] text-white/30 tracking-[0.2em] uppercase">Click để chọn logo</p>
+              </div>
+              <img id="b-logo-preview" class="hidden w-full max-h-24 object-contain py-3 px-6" alt="Logo preview" />
+            </div>
+            <input id="b-logo-ref" type="hidden" value="" />
+            <div id="b-logo-status" class="hidden font-mono text-[10px] text-white/40"></div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Đánh giá (1–5)</label>
+              <input id="b-rating" type="number" min="1" max="5" step="0.1" placeholder="4.5"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Cashback</label>
+              <input id="b-cashback" type="text" placeholder="VD: $3/lot"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Nạp tối thiểu</label>
+              <input id="b-deposit" type="text" placeholder="$100"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Spread</label>
+              <input id="b-spread" type="text" placeholder="Từ 0.0 pip"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Đòn bẩy</label>
+              <input id="b-leverage" type="text" placeholder="1:500"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Giấy phép</label>
+              <input id="b-regulation" type="text" placeholder="ASIC, FCA, CySEC"
+                class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                       placeholder:text-white/20 focus:outline-none focus:border-gold/60" />
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Ưu điểm (mỗi dòng 1 điểm)</label>
+            <textarea id="b-pros" rows="4" placeholder="Spread thấp, ổn định&#10;Nạp rút nhanh&#10;Hỗ trợ tiếng Việt"
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60 resize-none font-mono"></textarea>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Nhược điểm (mỗi dòng 1 điểm)</label>
+            <textarea id="b-cons" rows="3" placeholder="Phí swap cao&#10;Không hỗ trợ VND"
+              class="bg-ink-2 border border-white/10 px-4 py-3 text-[14px] text-white/90
+                     placeholder:text-white/20 focus:outline-none focus:border-gold/60 resize-none font-mono"></textarea>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-2.5 cursor-pointer">
+              <input id="b-featured" type="checkbox" class="w-4 h-4 accent-gold" />
+              <span class="font-mono text-[11px] text-white/60 tracking-[0.15em] uppercase">Đánh dấu nổi bật (hiện lên đầu)</span>
+            </label>
+          </div>
+
+          <div class="flex gap-3 mt-2">
+            <button id="broker-submit-btn" type="submit"
+              class="flex-1 py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
+                     hover:bg-gold-light transition-all duration-300 disabled:opacity-50">
+              Lưu sàn đối tác
+            </button>
+          </div>
+
+          <p id="broker-success" class="hidden text-center text-emerald-400 text-[14px] py-2">✓ Đã lưu thành công!</p>
+          <p id="broker-error"   class="hidden text-center text-red-400 text-[14px] py-2">Có lỗi xảy ra. Thử lại.</p>
+        </form>
+      </div>
+
       </div>
 
     </main>
@@ -708,15 +865,16 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
   }
 
   // ── TABS ──
-  const TABS = ['write', 'ai', 'posts', 'drafts'];
+  const TABS = ['write', 'ai', 'posts', 'drafts', 'broker-list', 'broker-form'];
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
       TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tab));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
       document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => b.classList.add('active-tab'));
-      if (tab === 'posts')   loadPosts();
-      if (tab === 'drafts')  loadDrafts();
+      if (tab === 'posts')       loadPosts();
+      if (tab === 'drafts')      loadDrafts();
+      if (tab === 'broker-list') loadBrokers();
     });
   });
 
@@ -1803,6 +1961,217 @@ Do NOT include: text, letters, logos, numbers, human faces, watermarks.`;
     document.getElementById('ai-image-result').classList.add('hidden');
     document.getElementById('ai-image-regen').classList.add('hidden');
   });
+
+  // ── BROKER MANAGEMENT ──
+  document.getElementById('b-name').addEventListener('input', e => {
+    if (document.getElementById('broker-edit-id').value) return;
+    document.getElementById('b-slug').value = slugify(e.target.value);
+  });
+
+  // Logo upload for broker
+  let brokerPendingLogo = null;
+  document.getElementById('b-logo-file').addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    brokerPendingLogo = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('b-logo-preview').src = ev.target.result;
+      document.getElementById('b-logo-preview').classList.remove('hidden');
+      document.getElementById('b-logo-placeholder').classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('b-logo-ref').value = '';
+  });
+
+  async function uploadBrokerLogo() {
+    if (document.getElementById('b-logo-ref').value) return document.getElementById('b-logo-ref').value;
+    if (!brokerPendingLogo) return null;
+    const statusEl = document.getElementById('b-logo-status');
+    statusEl.classList.remove('hidden'); statusEl.textContent = 'Đang tải logo...';
+    try {
+      const res = await fetch(ASSETS, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': brokerPendingLogo.type },
+        body: brokerPendingLogo,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      const assetId = data.document._id;
+      statusEl.textContent = '✓ Logo đã tải lên';
+      document.getElementById('b-logo-ref').value = assetId;
+      return assetId;
+    } catch (err) {
+      statusEl.textContent = '✗ Lỗi: ' + err.message;
+      throw err;
+    }
+  }
+
+  document.getElementById('broker-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn     = document.getElementById('broker-submit-btn');
+    const success = document.getElementById('broker-success');
+    const errEl   = document.getElementById('broker-error');
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+    success.classList.add('hidden'); errEl.classList.add('hidden');
+
+    try {
+      const logoAssetId = await uploadBrokerLogo();
+      const editId   = document.getElementById('broker-edit-id').value;
+      const name     = document.getElementById('b-name').value.trim();
+      const slug     = document.getElementById('b-slug').value.trim() || slugify(name);
+      const tagline  = document.getElementById('b-tagline').value.trim();
+      const affiliate= document.getElementById('b-affiliate').value.trim();
+      const ratingVal= parseFloat(document.getElementById('b-rating').value) || null;
+      const cashback = document.getElementById('b-cashback').value.trim();
+      const deposit  = document.getElementById('b-deposit').value.trim();
+      const spread   = document.getElementById('b-spread').value.trim();
+      const leverage = document.getElementById('b-leverage').value.trim();
+      const reg      = document.getElementById('b-regulation').value.trim();
+      const prosRaw  = document.getElementById('b-pros').value.trim();
+      const consRaw  = document.getElementById('b-cons').value.trim();
+      const featured = document.getElementById('b-featured').checked;
+
+      const doc = {
+        name, tagline, affiliateLink: affiliate || undefined,
+        slug: { _type: 'slug', current: slug },
+        rating: ratingVal,
+        cashbackRate: cashback || undefined,
+        minDeposit: deposit || undefined,
+        spread: spread || undefined,
+        leverage: leverage || undefined,
+        regulation: reg || undefined,
+        pros: prosRaw ? prosRaw.split('\n').map(s=>s.trim()).filter(Boolean) : [],
+        cons: consRaw ? consRaw.split('\n').map(s=>s.trim()).filter(Boolean) : [],
+        featured,
+      };
+      if (logoAssetId) doc.logo = { _type: 'image', asset: { _type: 'reference', _ref: logoAssetId } };
+
+      let mutations;
+      if (editId) {
+        mutations = [{ patch: { id: editId, set: doc } }];
+      } else {
+        mutations = [{ create: { _type: 'broker', ...doc } }];
+      }
+      const res = await fetch(`${API}/mutate/${DATASET}`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ mutations }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      if (DEPLOY_HOOK) fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
+      success.classList.remove('hidden');
+      resetBrokerForm();
+    } catch (err) {
+      errEl.textContent = 'Lỗi: ' + (err?.message ?? 'Thử lại.');
+      errEl.classList.remove('hidden');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Lưu sàn đối tác';
+    }
+  });
+
+  function resetBrokerForm() {
+    document.getElementById('broker-form').reset();
+    document.getElementById('broker-edit-id').value = '';
+    document.getElementById('broker-form-heading').textContent = 'Thêm sàn mới';
+    document.getElementById('broker-cancel').classList.add('hidden');
+    document.getElementById('b-logo-preview').classList.add('hidden');
+    document.getElementById('b-logo-placeholder').classList.remove('hidden');
+    document.getElementById('b-logo-ref').value = '';
+    brokerPendingLogo = null;
+  }
+
+  document.getElementById('broker-cancel').addEventListener('click', resetBrokerForm);
+
+  async function loadBrokers() {
+    const listEl = document.getElementById('broker-list');
+    listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Đang tải...</p>';
+    try {
+      const q = encodeURIComponent('*[_type == "broker"] | order(featured desc, order asc, name asc) { _id, name, slug, rating, cashbackRate, featured, affiliateLink }');
+      const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
+      const { result } = await res.json();
+      const brokers = result ?? [];
+
+      if (!brokers.length) {
+        listEl.innerHTML = '<p class="text-white/30 text-[13px] font-mono">Chưa có sàn nào.</p>';
+        return;
+      }
+
+      listEl.innerHTML = brokers.map(b => `
+        <div class="flex items-center justify-between border border-white/10 px-4 py-4 hover:border-white/20 transition-colors ${b.featured ? 'border-l-2 border-l-gold/50' : ''}">
+          <div class="flex-1 min-w-0 mr-4">
+            <div class="flex items-center gap-2">
+              ${b.featured ? '<span class="font-mono text-[9px] tracking-widest uppercase bg-gold/15 text-gold px-2 py-0.5">Nổi bật</span>' : ''}
+              <p class="text-[14px] text-white/90 font-medium">${b.name}</p>
+            </div>
+            <p class="font-mono text-[11px] text-white/30 mt-0.5">
+              ${b.cashbackRate ? `Cashback: ${b.cashbackRate} · ` : ''}${b.rating ? `★ ${b.rating}/5` : ''}
+            </p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <button data-id="${b._id}" class="broker-edit-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold transition-colors">Sửa</button>
+            <a href="/brokers/${b.slug?.current}" target="_blank"
+               class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-gold no-underline transition-colors">Xem</a>
+            <button data-id="${b._id}" class="broker-delete-btn font-mono text-[10px] tracking-[0.15em] uppercase text-white/40 hover:text-red-400 transition-colors">Xóa</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.broker-edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => loadBrokerForEdit(btn.dataset.id));
+      });
+      document.querySelectorAll('.broker-delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Xóa sàn này?`)) return;
+          await fetch(`${API}/mutate/${DATASET}`, {
+            method: 'POST', headers: HEADERS,
+            body: JSON.stringify({ mutations: [{ delete: { id: btn.dataset.id } }] }),
+          });
+          if (DEPLOY_HOOK) fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
+          loadBrokers();
+        });
+      });
+    } catch {
+      listEl.innerHTML = '<p class="text-red-400 text-[13px] font-mono">Không tải được danh sách.</p>';
+    }
+  }
+
+  async function loadBrokerForEdit(id) {
+    const q = encodeURIComponent(`*[_id == "${id}"][0]{ ..., "logoUrl": logo.asset->url }`);
+    const res = await fetch(`${API}/query/${DATASET}?query=${q}`, { headers: HEADERS });
+    const { result: b } = await res.json();
+    if (!b) return;
+
+    document.getElementById('broker-edit-id').value = b._id;
+    document.getElementById('b-name').value      = b.name ?? '';
+    document.getElementById('b-slug').value      = b.slug?.current ?? '';
+    document.getElementById('b-tagline').value   = b.tagline ?? '';
+    document.getElementById('b-affiliate').value = b.affiliateLink ?? '';
+    document.getElementById('b-rating').value    = b.rating ?? '';
+    document.getElementById('b-cashback').value  = b.cashbackRate ?? '';
+    document.getElementById('b-deposit').value   = b.minDeposit ?? '';
+    document.getElementById('b-spread').value    = b.spread ?? '';
+    document.getElementById('b-leverage').value  = b.leverage ?? '';
+    document.getElementById('b-regulation').value= b.regulation ?? '';
+    document.getElementById('b-pros').value      = (b.pros ?? []).join('\n');
+    document.getElementById('b-cons').value      = (b.cons ?? []).join('\n');
+    document.getElementById('b-featured').checked= b.featured ?? false;
+
+    if (b.logo?.asset?._ref) document.getElementById('b-logo-ref').value = b.logo.asset._ref;
+    if (b.logoUrl) {
+      document.getElementById('b-logo-preview').src = b.logoUrl;
+      document.getElementById('b-logo-preview').classList.remove('hidden');
+      document.getElementById('b-logo-placeholder').classList.add('hidden');
+    }
+
+    document.getElementById('broker-form-heading').textContent = `Chỉnh sửa: ${b.name}`;
+    document.getElementById('broker-cancel').classList.remove('hidden');
+
+    // Switch to broker-form tab
+    TABS.forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== 'broker-form'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+    document.querySelectorAll('[data-tab="broker-form"]').forEach(btn => btn.classList.add('active-tab'));
+    window.scrollTo(0, 0);
+  }
 </script>
 
 </body>

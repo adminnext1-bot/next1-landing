@@ -32,7 +32,8 @@ const plans = [
       'Thanh toán hoàn tiền minh bạch, đúng hạn theo chu kỳ cam kết',
       'Hỗ trợ mở tài khoản & tư vấn tối ưu điều kiện giao dịch tốt nhất',
     ],
-    cta: 'Đăng ký hoàn tiền',
+    cta: 'Xem sàn đối tác',
+    ctaHref: '/brokers',
     featured: true,
     badge: 'PHỔ BIẾN NHẤT',
   },
@@ -108,7 +109,7 @@ const plans = [
           </ul>
 
           <a
-            href="#contact"
+            href={plan.ctaHref ?? '#contact'}
             class={[
               'block w-full py-3.5 text-center text-[12px] font-semibold tracking-[0.15em] uppercase no-underline transition-all duration-300',
               plan.featured

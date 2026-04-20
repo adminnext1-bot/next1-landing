@@ -1,0 +1,212 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/common/Nav.astro';
+import Footer from '../../components/common/Footer.astro';
+import { getAllBrokers } from '../../lib/sanity';
+import '../../styles/global.css';
+
+const brokers = await getAllBrokers();
+
+function stars(rating: number) {
+  const full  = Math.round(rating);
+  return '★'.repeat(full) + '☆'.repeat(5 - full);
+}
+---
+
+<Layout
+  title="Đối tác Broker – NEXT 1"
+  description="Danh sách các sàn giao dịch đối tác uy tín trong hệ sinh thái NEXT 1. Hoàn tiền cashback, điều kiện giao dịch tốt nhất."
+>
+  <Nav />
+  <main class="pt-[72px] min-h-screen">
+
+    <!-- Hero -->
+    <section class="relative border-b border-white/10 px-6 md:px-16 py-20 md:py-28 overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(201,168,76,0.07),transparent_70%)] pointer-events-none"></div>
+      <div class="relative z-10 max-w-6xl mx-auto">
+        <span class="section-label mb-4">// Hệ sinh thái NEXT 1</span>
+        <h1 class="section-title max-w-2xl">
+          Sàn đối tác<br />
+          <span class="text-gold italic font-normal">uy tín.</span>
+        </h1>
+        <p class="mt-6 text-[16px] text-white/60 font-light max-w-lg leading-relaxed">
+          Những sàn giao dịch được NEXT 1 lựa chọn kỹ lưỡng — đảm bảo điều kiện tốt nhất, hoàn tiền cashback minh bạch và hỗ trợ tận tâm.
+        </p>
+
+        <!-- Cashback highlight -->
+        <div class="mt-10 inline-flex items-center gap-4 border border-gold/30 bg-gold/[0.05] px-6 py-4">
+          <span class="text-gold text-xl">◆</span>
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-0.5">Đặc quyền NEXT 1</p>
+            <p class="text-[15px] text-white/80 font-light">Hoàn tiền cashback trên mỗi lot giao dịch · Thanh toán đúng hạn · Không điều kiện ẩn</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Broker grid -->
+    <section class="px-6 md:px-16 py-16 md:py-24">
+      <div class="max-w-6xl mx-auto">
+
+        {brokers.length === 0 ? (
+          <div class="text-center py-32">
+            <p class="font-mono text-[13px] tracking-[0.2em] uppercase text-white/25">Đang cập nhật danh sách đối tác.</p>
+          </div>
+        ) : (
+          <div class="flex flex-col gap-6">
+            {brokers.map((broker, i) => (
+              <article
+                class="reveal group relative border border-white/10 hover:border-gold/40
+                       transition-all duration-300 bg-ink hover:bg-ink-2"
+                style={`animation-delay: ${i * 0.08}s`}
+              >
+                {broker.featured && (
+                  <div class="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+                )}
+                {broker.featured && (
+                  <span class="absolute -top-3 left-8 bg-gold text-ink text-[9px] font-bold tracking-[0.22em] uppercase px-4 py-1">
+                    ĐỐI TÁC NỔI BẬT
+                  </span>
+                )}
+
+                <div class="grid md:grid-cols-[220px_1fr_auto] gap-6 p-6 md:p-8 items-center">
+
+                  <!-- Logo + tên -->
+                  <div class="flex flex-col items-start gap-4">
+                    {broker.logo?.asset?.url ? (
+                      <div class="w-36 h-16 flex items-center">
+                        <img
+                          src={broker.logo.asset.url}
+                          alt={broker.name}
+                          class="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
+                        />
+                      </div>
+                    ) : (
+                      <div class="w-36 h-16 border border-white/10 flex items-center justify-center bg-ink-2">
+                        <span class="font-serif text-xl font-bold text-gold/40">{broker.name.slice(0,4)}</span>
+                      </div>
+                    )}
+                    <div>
+                      <h2 class="font-serif text-[20px] font-bold text-white group-hover:text-gold transition-colors">
+                        {broker.name}
+                      </h2>
+                      {broker.tagline && (
+                        <p class="text-[12px] text-white/40 mt-1 leading-snug">{broker.tagline}</p>
+                      )}
+                      {broker.rating && (
+                        <div class="flex items-center gap-2 mt-2">
+                          <span class="text-gold text-[13px] tracking-wide">{stars(broker.rating)}</span>
+                          <span class="font-mono text-[11px] text-white/40">{broker.rating}/5</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <!-- Thông số -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {broker.cashbackRate && (
+                      <div class="flex flex-col gap-1">
+                        <span class="font-mono text-[9px] tracking-[0.25em] uppercase text-gold">Cashback</span>
+                        <span class="text-[15px] font-semibold text-white">{broker.cashbackRate}</span>
+                      </div>
+                    )}
+                    {broker.minDeposit && (
+                      <div class="flex flex-col gap-1">
+                        <span class="font-mono text-[9px] tracking-[0.25em] uppercase text-white/30">Nạp tối thiểu</span>
+                        <span class="text-[15px] font-semibold text-white/80">{broker.minDeposit}</span>
+                      </div>
+                    )}
+                    {broker.spread && (
+                      <div class="flex flex-col gap-1">
+                        <span class="font-mono text-[9px] tracking-[0.25em] uppercase text-white/30">Spread</span>
+                        <span class="text-[15px] font-semibold text-white/80">{broker.spread}</span>
+                      </div>
+                    )}
+                    {broker.leverage && (
+                      <div class="flex flex-col gap-1">
+                        <span class="font-mono text-[9px] tracking-[0.25em] uppercase text-white/30">Đòn bẩy</span>
+                        <span class="text-[15px] font-semibold text-white/80">{broker.leverage}</span>
+                      </div>
+                    )}
+                    {broker.regulation && (
+                      <div class="flex flex-col gap-1 col-span-2 sm:col-span-4">
+                        <span class="font-mono text-[9px] tracking-[0.25em] uppercase text-white/30">Giấy phép</span>
+                        <span class="text-[13px] text-white/60">{broker.regulation}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex flex-col gap-3 min-w-[160px]">
+                    {broker.affiliateLink && (
+                      <a
+                        href={broker.affiliateLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="block w-full py-3.5 text-center text-[11px] font-semibold tracking-[0.15em] uppercase
+                               bg-gold text-ink hover:bg-gold-light no-underline
+                               hover:shadow-[0_8px_24px_rgba(201,168,76,0.25)] transition-all duration-300"
+                      >
+                        Đăng ký ngay →
+                      </a>
+                    )}
+                    <a
+                      href={`/brokers/${broker.slug.current}`}
+                      class="block w-full py-3 text-center text-[11px] font-medium tracking-[0.15em] uppercase
+                             border border-white/20 text-white/60 hover:border-gold/50 hover:text-gold
+                             no-underline transition-all duration-300"
+                    >
+                      Xem review
+                    </a>
+                  </div>
+
+                </div>
+
+                <!-- Pros quick preview -->
+                {broker.pros && broker.pros.length > 0 && (
+                  <div class="px-6 md:px-8 pb-6 flex flex-wrap gap-2 border-t border-white/5 pt-4 mt-0">
+                    {broker.pros.slice(0, 3).map(pro => (
+                      <span class="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.15em] text-emerald-400/70 bg-emerald-400/5 border border-emerald-400/15 px-3 py-1">
+                        ✓ {pro}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+
+        <!-- CTA bottom -->
+        <div class="mt-20 border border-white/10 bg-ink-2 p-10 md:p-14 text-center reveal">
+          <p class="font-mono text-[10px] tracking-[0.4em] uppercase text-gold mb-4">// Chưa thấy sàn phù hợp?</p>
+          <h3 class="font-serif text-[26px] md:text-[32px] font-bold mb-4">
+            Liên hệ để được tư vấn<br /><span class="text-gold italic font-normal">miễn phí.</span>
+          </h3>
+          <p class="text-white/50 text-[14px] max-w-md mx-auto mb-8 leading-relaxed">
+            Đội ngũ NEXT 1 sẽ giúp bạn chọn sàn phù hợp nhất với chiến lược, vốn và mục tiêu giao dịch của bạn.
+          </p>
+          <a href="/#contact"
+            class="inline-block px-10 py-4 border border-gold text-gold text-[12px] font-semibold
+                   tracking-[0.15em] uppercase no-underline hover:bg-gold hover:text-ink
+                   transition-all duration-300">
+            Tư vấn ngay
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <Footer />
+  </main>
+</Layout>
+
+<script>
+  const observer = new IntersectionObserver(
+    (entries) => entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    }),
+    { threshold: 0.05, rootMargin: '0px 0px -30px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+</script>

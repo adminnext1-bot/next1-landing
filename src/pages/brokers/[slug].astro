@@ -1,0 +1,223 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/common/Nav.astro';
+import Footer from '../../components/common/Footer.astro';
+import { getAllBrokers, getBrokerBySlug } from '../../lib/sanity';
+import { PortableText } from '@portabletext/astro';
+import '../../styles/global.css';
+
+export async function getStaticPaths() {
+  const brokers = await getAllBrokers();
+  return brokers.map((b) => ({ params: { slug: b.slug.current } }));
+}
+
+const { slug } = Astro.params;
+const broker = await getBrokerBySlug(slug!);
+if (!broker) return Astro.redirect('/brokers');
+
+function stars(r: number) {
+  const f = Math.round(r);
+  return '★'.repeat(f) + '☆'.repeat(5 - f);
+}
+
+const specs = [
+  { label: 'Cashback',       value: broker.cashbackRate, highlight: true },
+  { label: 'Nạp tối thiểu', value: broker.minDeposit },
+  { label: 'Spread',         value: broker.spread },
+  { label: 'Đòn bẩy',       value: broker.leverage },
+  { label: 'Giấy phép',     value: broker.regulation },
+].filter(s => s.value);
+---
+
+<Layout
+  title={`${broker.name} Review – NEXT 1`}
+  description={broker.tagline ?? `Review chi tiết ${broker.name} — điều kiện giao dịch, cashback và đánh giá từ NEXT 1.`}
+>
+  <Nav />
+  <main class="pt-[72px] min-h-screen">
+
+    <!-- Header -->
+    <header class="relative border-b border-white/10 px-6 md:px-16 py-14 md:py-20 overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(201,168,76,0.06),transparent_70%)] pointer-events-none"></div>
+      <div class="relative z-10 max-w-6xl mx-auto">
+
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 mb-8">
+          <a href="/" class="hover:text-gold transition-colors no-underline">Trang chủ</a>
+          <span>·</span>
+          <a href="/brokers" class="hover:text-gold transition-colors no-underline">Đối tác</a>
+          <span>·</span>
+          <span class="text-white/60">{broker.name}</span>
+        </div>
+
+        <div class="grid md:grid-cols-[1fr_auto] gap-10 items-start">
+          <!-- Left: Info -->
+          <div>
+            <!-- Logo -->
+            {broker.logo?.asset?.url ? (
+              <div class="mb-6 h-16 flex items-center">
+                <img
+                  src={broker.logo.asset.url}
+                  alt={broker.name}
+                  class="max-h-full max-w-[180px] object-contain"
+                />
+              </div>
+            ) : (
+              <div class="mb-6 w-32 h-16 border border-white/10 bg-ink-2 flex items-center justify-center">
+                <span class="font-serif text-2xl font-bold text-gold/40">{broker.name.slice(0,4)}</span>
+              </div>
+            )}
+
+            <h1 class="font-serif text-[clamp(32px,5vw,52px)] font-bold leading-tight mb-3">
+              {broker.name}
+            </h1>
+            {broker.tagline && (
+              <p class="text-[16px] text-white/55 font-light leading-relaxed max-w-lg mb-5">{broker.tagline}</p>
+            )}
+            {broker.rating && (
+              <div class="flex items-center gap-3">
+                <span class="text-gold text-[20px] tracking-wide">{stars(broker.rating)}</span>
+                <span class="font-mono text-[13px] text-white/50">{broker.rating} / 5</span>
+                <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-gold bg-gold/10 border border-gold/20 px-2.5 py-1">
+                  NEXT 1 Verified
+                </span>
+              </div>
+            )}
+          </div>
+
+          <!-- Right: CTA box -->
+          <div class="border border-gold/30 bg-gold/[0.04] p-6 md:p-8 min-w-[240px]">
+            {broker.cashbackRate && (
+              <div class="mb-5 text-center">
+                <p class="font-mono text-[9px] tracking-[0.3em] uppercase text-gold mb-1">Cashback NEXT 1</p>
+                <p class="font-serif text-[36px] font-black text-gold leading-none">{broker.cashbackRate}</p>
+                <p class="text-[11px] text-white/40 mt-1">trên mỗi lot giao dịch</p>
+              </div>
+            )}
+            {broker.affiliateLink ? (
+              <a
+                href={broker.affiliateLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block w-full py-4 text-center text-[12px] font-bold tracking-[0.18em] uppercase
+                       bg-gold text-ink hover:bg-gold-light no-underline
+                       hover:shadow-[0_10px_30px_rgba(201,168,76,0.3)] transition-all duration-300 mb-3"
+              >
+                Mở tài khoản →
+              </a>
+            ) : (
+              <a href="/#contact"
+                class="block w-full py-4 text-center text-[12px] font-bold tracking-[0.18em] uppercase
+                       bg-gold text-ink hover:bg-gold-light no-underline transition-all duration-300 mb-3">
+                Liên hệ tư vấn →
+              </a>
+            )}
+            <a href="/#contact"
+              class="block w-full py-3 text-center text-[11px] font-medium tracking-[0.15em] uppercase
+                     border border-white/20 text-white/50 hover:border-gold/40 hover:text-gold
+                     no-underline transition-all duration-300">
+              Hỏi đội ngũ NEXT 1
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Specs bar -->
+    {specs.length > 0 && (
+      <section class="border-b border-white/10 bg-ink-2 px-6 md:px-16 py-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+          {specs.map(s => (
+            <div class="flex flex-col gap-1">
+              <span class={`font-mono text-[9px] tracking-[0.25em] uppercase ${s.highlight ? 'text-gold' : 'text-white/30'}`}>
+                {s.label}
+              </span>
+              <span class={`text-[16px] font-semibold ${s.highlight ? 'text-gold' : 'text-white/80'}`}>
+                {s.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Pros / Cons -->
+    {(broker.pros?.length || broker.cons?.length) && (
+      <section class="px-6 md:px-16 py-12 border-b border-white/10">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+          {broker.pros?.length && (
+            <div>
+              <h3 class="font-mono text-[10px] tracking-[0.3em] uppercase text-emerald-400 mb-4">✓ Ưu điểm</h3>
+              <ul class="flex flex-col gap-3">
+                {broker.pros.map(p => (
+                  <li class="flex items-start gap-3 text-[14px] text-white/70 leading-snug">
+                    <span class="text-emerald-400 text-[10px] mt-1 flex-shrink-0">◆</span>
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {broker.cons?.length && (
+            <div>
+              <h3 class="font-mono text-[10px] tracking-[0.3em] uppercase text-red-400/70 mb-4">✕ Nhược điểm</h3>
+              <ul class="flex flex-col gap-3">
+                {broker.cons.map(c => (
+                  <li class="flex items-start gap-3 text-[14px] text-white/55 leading-snug">
+                    <span class="text-red-400/60 text-[10px] mt-1 flex-shrink-0">◆</span>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- Review body -->
+    {broker.body && broker.body.length > 0 && (
+      <section class="px-6 md:px-16 py-16">
+        <div class="max-w-3xl mx-auto prose-next1">
+          <PortableText value={broker.body} />
+        </div>
+      </section>
+    )}
+
+    <!-- Bottom CTA -->
+    <section class="px-6 md:px-16 py-16 border-t border-white/10 bg-ink-2">
+      <div class="max-w-3xl mx-auto text-center">
+        <p class="font-mono text-[10px] tracking-[0.4em] uppercase text-gold mb-4">// Sẵn sàng bắt đầu?</p>
+        <h2 class="font-serif text-[28px] md:text-[36px] font-bold mb-4">
+          Mở tài khoản {broker.name}<br />
+          <span class="text-gold italic font-normal">qua NEXT 1 — nhận cashback ngay.</span>
+        </h2>
+        <p class="text-white/45 text-[14px] max-w-md mx-auto mb-8 leading-relaxed">
+          Đăng ký qua link của NEXT 1 để được hưởng mức hoàn tiền ưu đãi và hỗ trợ tận tâm từ đội ngũ.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          {broker.affiliateLink && (
+            <a
+              href={broker.affiliateLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-10 py-4 bg-gold text-ink text-[12px] font-bold tracking-[0.18em] uppercase
+                     no-underline hover:bg-gold-light hover:shadow-[0_10px_30px_rgba(201,168,76,0.25)]
+                     transition-all duration-300"
+            >
+              Mở tài khoản {broker.name} →
+            </a>
+          )}
+          <a href="/brokers"
+            class="px-10 py-4 border border-white/20 text-white/60 text-[12px] font-medium
+                   tracking-[0.15em] uppercase no-underline hover:border-gold/40 hover:text-gold
+                   transition-all duration-300">
+            ← Xem sàn khác
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <Footer />
+  </main>
+</Layout>
