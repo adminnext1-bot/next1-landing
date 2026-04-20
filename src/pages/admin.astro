@@ -885,6 +885,12 @@ const DEPLOY_HOOK  = 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy
     document.getElementById('f-slug').value = slugify(e.target.value);
   });
 
+  // Broker: auto-generate slug from name
+  document.getElementById('b-name').addEventListener('input', e => {
+    if (document.getElementById('broker-edit-id').value) return; // skip if editing
+    document.getElementById('b-slug').value = slugify(e.target.value);
+  });
+
   function slugify(str) {
     return str.toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -2020,7 +2026,7 @@ Do NOT include: text, letters, logos, numbers, human faces, watermarks.`;
       const logoAssetId = await uploadBrokerLogo();
       const editId   = document.getElementById('broker-edit-id').value;
       const name     = document.getElementById('b-name').value.trim();
-      const slug     = document.getElementById('b-slug').value.trim() || slugify(name);
+      const slug     = slugify(document.getElementById('b-slug').value.trim() || name);
       const tagline  = document.getElementById('b-tagline').value.trim();
       const affiliate= document.getElementById('b-affiliate').value.trim();
       const ratingVal= parseFloat(document.getElementById('b-rating').value) || null;
