@@ -10,6 +10,7 @@
     "studio:deploy": "sanity deploy"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
     "@astrojs/tailwind": "^5.1.0",
     "@portabletext/to-html": "^5.0.2",
     "@sanity/client": "^7.20.0",
