@@ -7,10 +7,10 @@ const platform = [
 ];
 
 const community = [
-  'Facebook Group',
-  'YouTube Channel',
-  'TikTok',
-  'Telegram',
+  { label: 'Facebook',  href: 'https://www.facebook.com/next1hub' },
+  { label: 'YouTube',   href: 'https://www.youtube.com/@next1hub' },
+  { label: 'TikTok',    href: 'https://www.tiktok.com/@next1hub' },
+  { label: 'Telegram',  href: 'https://t.me/next1trading' },
 ];
 ---
 
@@ -52,8 +52,9 @@ const community = [
       <ul class="flex flex-col gap-3 list-none">
         {community.map((item) => (
           <li>
-            <a href="#" class="text-[14px] text-white/75 no-underline transition-colors duration-200 hover:text-gold">
-              {item}
+            <a href={item.href} target="_blank" rel="noopener noreferrer"
+               class="text-[14px] text-white/75 no-underline transition-colors duration-200 hover:text-gold">
+              {item.label}
             </a>
           </li>
         ))}
