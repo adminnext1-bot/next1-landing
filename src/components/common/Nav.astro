@@ -1,11 +1,11 @@
 ---
 const links = [
-  { label: 'Về chúng tôi', href: '/#about' },
-  { label: 'Dịch vụ',      href: '/#pillars' },
-  { label: 'Thành viên',   href: '/#membership' },
-  { label: 'Đối tác',      href: '/brokers' },
-  { label: 'Blog',          href: '/blog' },
-  { label: 'Liên hệ',      href: '/#contact' },
+  { label: 'Về chúng tôi', key: 'nav.about',      href: '/#about' },
+  { label: 'Dịch vụ',      key: 'nav.services',    href: '/#pillars' },
+  { label: 'Thành viên',   key: 'nav.membership',  href: '/#membership' },
+  { label: 'Đối tác',      key: 'nav.partners',    href: '/brokers' },
+  { label: 'Blog',          key: 'nav.blog',        href: '/blog' },
+  { label: 'Liên hệ',      key: 'nav.contact',     href: '/#contact' },
 ];
 
 const APP_URL = 'https://app.next1hub.com';
@@ -29,6 +29,7 @@ const APP_URL = 'https://app.next1hub.com';
       <li>
         <a
           href={l.href}
+          data-i18n={l.key}
           class="relative text-[13px] font-normal tracking-[0.12em] uppercase text-white/80
                  no-underline pb-1
                  after:absolute after:bottom-0 after:left-0 after:h-px after:w-0
@@ -43,9 +44,20 @@ const APP_URL = 'https://app.next1hub.com';
 
   <!-- Desktop CTAs -->
   <div class="hidden md:flex items-center gap-3">
-    <!-- Login button -->
+    <!-- Language toggle -->
+    <button
+      data-lang-toggle
+      class="w-10 h-[38px] border border-white/20 text-white/50 text-[11px] font-mono
+             tracking-[0.15em] uppercase hover:border-gold hover:text-gold
+             transition-all duration-300"
+    >
+      EN
+    </button>
+
+    <!-- Login -->
     <a
       href={`${APP_URL}/login`}
+      data-i18n="nav.login"
       class="px-5 py-2.5
              border border-white/30 text-white/70 text-[12px] font-medium tracking-[0.12em] uppercase
              no-underline transition-all duration-300
@@ -57,6 +69,7 @@ const APP_URL = 'https://app.next1hub.com';
     <!-- Join CTA -->
     <a
       href="#membership"
+      data-i18n="nav.join"
       class="px-7 py-2.5
              border border-gold text-gold text-[12px] font-medium tracking-[0.12em] uppercase
              no-underline transition-all duration-300
@@ -88,6 +101,7 @@ const APP_URL = 'https://app.next1hub.com';
   {links.map((l) => (
     <a
       href={l.href}
+      data-i18n={l.key}
       class="font-serif text-3xl text-white/80 hover:text-gold transition-colors no-underline tracking-wide"
     >
       {l.label}
@@ -97,6 +111,7 @@ const APP_URL = 'https://app.next1hub.com';
   <!-- Mobile: Login -->
   <a
     href={`${APP_URL}/login`}
+    data-i18n="nav.login"
     class="mt-2 px-10 py-3 border border-white/30 text-white/70 text-sm font-medium
            tracking-[0.15em] uppercase no-underline hover:border-white hover:text-white transition-all"
   >
@@ -106,9 +121,19 @@ const APP_URL = 'https://app.next1hub.com';
   <!-- Mobile: Join -->
   <a
     href="#membership"
+    data-i18n="nav.join"
     class="px-10 py-4 border border-gold text-gold text-sm font-medium
            tracking-[0.15em] uppercase no-underline hover:bg-gold hover:text-ink transition-all"
   >
     Tham gia ngay
   </a>
+
+  <!-- Mobile: Language toggle -->
+  <button
+    data-lang-toggle
+    class="px-8 py-2.5 border border-white/15 text-white/40 text-[11px] font-mono
+           tracking-[0.2em] uppercase hover:border-gold/40 hover:text-gold transition-all"
+  >
+    EN
+  </button>
 </div>

@@ -1,9 +1,9 @@
 ---
 const values = [
-  { icon: '◈', title: 'Minh bạch',  desc: 'Lịch sử giao dịch công khai. Không giấu thua. Không tô hồng lợi nhuận.' },
-  { icon: '⬡', title: 'Hệ thống',   desc: 'Chiến lược rõ ràng. Không giao dịch theo cảm xúc hay FOMO.' },
-  { icon: '◎', title: 'Cộng đồng',  desc: 'Không ai đi một mình. Học cùng nhau, chịu trách nhiệm cùng nhau.' },
-  { icon: '◆', title: 'Đạo đức',    desc: 'Không "lùa gà". Không bán giấc mơ. Không quảng cáo FOMO.' },
+  { icon: '◈', titleKey: 'about.v1.title', descKey: 'about.v1.desc', title: 'Minh bạch',  desc: 'Lịch sử giao dịch công khai. Không giấu thua. Không tô hồng lợi nhuận.' },
+  { icon: '⬡', titleKey: 'about.v2.title', descKey: 'about.v2.desc', title: 'Hệ thống',   desc: 'Chiến lược rõ ràng. Không giao dịch theo cảm xúc hay FOMO.' },
+  { icon: '◎', titleKey: 'about.v3.title', descKey: 'about.v3.desc', title: 'Cộng đồng',  desc: 'Không ai đi một mình. Học cùng nhau, chịu trách nhiệm cùng nhau.' },
+  { icon: '◆', titleKey: 'about.v4.title', descKey: 'about.v4.desc', title: 'Đạo đức',    desc: 'Không "lùa gà". Không bán giấc mơ. Không quảng cáo FOMO.' },
 ];
 ---
 
@@ -12,20 +12,21 @@ const values = [
 
     <!-- Left: content -->
     <div class="reveal">
-      <span class="section-label mb-4">// 01 — Về chúng tôi</span>
-      <h2 class="section-title">
+      <span data-i18n="about.label" class="section-label mb-4">// 01 — Về chúng tôi</span>
+      <h2 data-i18n-html="about.h2" class="section-title">
         Không chỉ là nơi<br />để <span class="text-gold italic font-normal">trade.</span>
       </h2>
 
-      <p class="mt-8 text-[17px] leading-[1.85] text-white/75 font-light">
+      <p data-i18n="about.p1" class="mt-8 text-[17px] leading-[1.85] text-white/75 font-light">
         NEXT 1 là hệ sinh thái tài chính dành cho nhà đầu tư Việt Nam — nơi bạn không chỉ học kỹ thuật,
         mà xây dựng tư duy, kỷ luật và hệ thống bền vững.
-        <br /><br />
+      </p>
+      <p data-i18n="about.p2" class="mt-4 text-[17px] leading-[1.85] text-white/75 font-light">
         Chúng tôi tin rằng sự thịnh vượng thực sự bắt đầu từ hiểu biết và kinh nghiệm, không phải may mắn.
       </p>
 
       <blockquote class="mt-10 pl-8 border-l-[3px] border-gold bg-gold/[0.07] py-6 pr-7">
-        <p class="font-serif text-[19px] italic text-white/80 leading-relaxed">
+        <p data-i18n="about.quote" class="font-serif text-[19px] italic text-white/80 leading-relaxed">
           "Thị trường không thưởng người thông minh nhất — nó thưởng người kỷ luật nhất."
         </p>
       </blockquote>
@@ -40,8 +41,8 @@ const values = [
           <span class="absolute inset-x-0 top-0 h-[2px] bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
 
           <span class="text-[26px] mb-4 block">{v.icon}</span>
-          <div class="font-serif text-[19px] font-bold text-white mb-2">{v.title}</div>
-          <p class="text-[13px] text-white/40 leading-relaxed">{v.desc}</p>
+          <div data-i18n={v.titleKey} class="font-serif text-[19px] font-bold text-white mb-2">{v.title}</div>
+          <p data-i18n={v.descKey} class="text-[13px] text-white/40 leading-relaxed">{v.desc}</p>
         </div>
       ))}
     </div>

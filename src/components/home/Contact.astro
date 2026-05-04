@@ -11,12 +11,12 @@ const FORMSPREE_ID = 'mnjgwgek';
 
     <!-- Left: info -->
     <div class="reveal">
-      <span class="section-label mb-4">// 05 — Liên hệ</span>
-      <h2 class="section-title">
+      <span data-i18n="contact.label" class="section-label mb-4">// 05 — Liên hệ</span>
+      <h2 data-i18n-html="contact.h2" class="section-title">
         Hãy bắt đầu<br />
         <span class="text-gold italic font-normal">cuộc trò chuyện.</span>
       </h2>
-      <p class="mt-6 text-[16px] leading-relaxed text-white/60 font-light max-w-sm">
+      <p data-i18n="contact.sub" class="mt-6 text-[16px] leading-relaxed text-white/60 font-light max-w-sm">
         Muốn tham gia cộng đồng, đăng ký hoàn phí giao dịch, hay cần tư vấn đầu tư cá nhân — đội ngũ NEXT 1 luôn sẵn sàng đồng hành.
       </p>
 
@@ -60,16 +60,18 @@ const FORMSPREE_ID = 'mnjgwgek';
         <!-- Name + Email -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] tracking-[0.2em] uppercase text-white/40">Họ và tên *</label>
+            <label data-i18n="contact.name" class="text-[11px] tracking-[0.2em] uppercase text-white/40">Họ và tên *</label>
             <input
-              type="text" name="name" required placeholder="Nguyễn Văn A"
+              type="text" name="name" required
+              data-i18n-ph="contact.name.ph"
+              placeholder="Nguyễn Văn A"
               class="bg-ink border border-white/10 px-4 py-3 text-[14px] text-white/90
                      placeholder:text-white/20 focus:outline-none focus:border-gold/60
                      transition-colors duration-200 w-full"
             />
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] tracking-[0.2em] uppercase text-white/40">Email *</label>
+            <label data-i18n="contact.email" class="text-[11px] tracking-[0.2em] uppercase text-white/40">Email *</label>
             <input
               type="email" name="email" required placeholder="email@example.com"
               class="bg-ink border border-white/10 px-4 py-3 text-[14px] text-white/90
@@ -82,7 +84,7 @@ const FORMSPREE_ID = 'mnjgwgek';
         <!-- Phone + Interest -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] tracking-[0.2em] uppercase text-white/40">Số điện thoại</label>
+            <label data-i18n="contact.phone" class="text-[11px] tracking-[0.2em] uppercase text-white/40">Số điện thoại</label>
             <input
               type="tel" name="phone" placeholder="0912 345 678"
               class="bg-ink border border-white/10 px-4 py-3 text-[14px] text-white/90
@@ -91,7 +93,7 @@ const FORMSPREE_ID = 'mnjgwgek';
             />
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[11px] tracking-[0.2em] uppercase text-white/40">Quan tâm đến</label>
+            <label data-i18n="contact.interest" class="text-[11px] tracking-[0.2em] uppercase text-white/40">Quan tâm đến</label>
             <div class="relative">
               <select
                 name="interest"
@@ -99,11 +101,11 @@ const FORMSPREE_ID = 'mnjgwgek';
                        focus:outline-none focus:border-gold/60 transition-colors duration-200
                        w-full appearance-none cursor-pointer"
               >
-                <option value="community">Cộng đồng chuyên nghiệp (Miễn phí)</option>
-                <option value="cashback">Cashback — Hoàn phí giao dịch</option>
-                <option value="investing">Investing Advice — Tư vấn đầu tư</option>
-                <option value="partnership">Hợp tác / Partnership</option>
-                <option value="other">Khác</option>
+                <option data-i18n="contact.opt1" value="community">Cộng đồng chuyên nghiệp (Miễn phí)</option>
+                <option data-i18n="contact.opt2" value="cashback">Cashback — Hoàn phí giao dịch</option>
+                <option data-i18n="contact.opt3" value="investing">Investing Advice — Tư vấn đầu tư</option>
+                <option data-i18n="contact.opt4" value="partnership">Hợp tác / Partnership</option>
+                <option data-i18n="contact.opt5" value="other">Khác</option>
               </select>
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gold/60 pointer-events-none text-[10px]">▼</span>
             </div>
@@ -112,9 +114,10 @@ const FORMSPREE_ID = 'mnjgwgek';
 
         <!-- Message -->
         <div class="flex flex-col gap-1.5">
-          <label class="text-[11px] tracking-[0.2em] uppercase text-white/40">Lời nhắn *</label>
+          <label data-i18n="contact.message" class="text-[11px] tracking-[0.2em] uppercase text-white/40">Lời nhắn *</label>
           <textarea
             name="message" required rows="5"
+            data-i18n-ph="contact.msg.ph"
             placeholder="Cho chúng tôi biết bạn muốn hỏi gì..."
             class="bg-ink border border-white/10 px-4 py-3 text-[14px] text-white/90
                    placeholder:text-white/20 focus:outline-none focus:border-gold/60
@@ -126,6 +129,7 @@ const FORMSPREE_ID = 'mnjgwgek';
         <button
           id="submit-btn"
           type="submit"
+          data-i18n="contact.submit"
           class="mt-2 w-full py-4 bg-gold text-ink text-[12px] font-semibold tracking-[0.15em] uppercase
                  transition-all duration-300 hover:bg-gold-light hover:shadow-[0_10px_40px_rgba(201,168,76,0.3)]
                  disabled:opacity-50 disabled:cursor-not-allowed"
@@ -134,10 +138,10 @@ const FORMSPREE_ID = 'mnjgwgek';
         </button>
 
         <!-- Success / error states -->
-        <p id="form-success" class="hidden text-center text-emerald-400 text-[14px] py-2">
+        <p id="form-success" data-i18n="contact.success" class="hidden text-center text-emerald-400 text-[14px] py-2">
           ✓ Đã gửi thành công — chúng tôi sẽ liên hệ sớm nhất có thể.
         </p>
-        <p id="form-error" class="hidden text-center text-red-400 text-[14px] py-2">
+        <p id="form-error" data-i18n="contact.error" class="hidden text-center text-red-400 text-[14px] py-2">
           Có lỗi xảy ra. Vui lòng thử lại hoặc gửi email trực tiếp.
         </p>
       </form>
@@ -155,7 +159,8 @@ const FORMSPREE_ID = 'mnjgwgek';
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     btn.disabled    = true;
-    btn.textContent = 'Đang gửi...';
+    const sendingText = document.documentElement.lang === 'en' ? 'Sending...' : 'Đang gửi...';
+    btn.textContent = sendingText;
     success.classList.add('hidden');
     error.classList.add('hidden');
 
@@ -169,13 +174,15 @@ const FORMSPREE_ID = 'mnjgwgek';
       if (res.ok) {
         form.reset();
         success.classList.remove('hidden');
-        btn.textContent = 'Gửi tin nhắn';
+        btn.textContent = btn.dataset.i18n
+          ? (document.documentElement.lang === 'en' ? 'Send Message' : 'Gửi tin nhắn')
+          : 'Gửi tin nhắn';
       } else {
         throw new Error();
       }
     } catch {
       error.classList.remove('hidden');
-      btn.textContent = 'Gửi tin nhắn';
+      btn.textContent = document.documentElement.lang === 'en' ? 'Send Message' : 'Gửi tin nhắn';
     } finally {
       btn.disabled = false;
     }

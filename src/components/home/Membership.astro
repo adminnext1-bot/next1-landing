@@ -63,11 +63,11 @@ const plans = [
 
     <!-- Header -->
     <div class="text-center mb-12 md:mb-20 reveal">
-      <span class="section-label text-center mb-4">// 03 — Membership</span>
-      <h2 class="section-title">
+      <span data-i18n="membership.label" class="section-label text-center mb-4">// 03 — Membership</span>
+      <h2 data-i18n-html="membership.h2" class="section-title">
         Chọn hành trình<br /><span class="text-gold italic font-normal">của bạn</span>
       </h2>
-      <p class="mt-5 text-[15px] text-white/40 max-w-[400px] mx-auto leading-relaxed">
+      <p data-i18n="membership.sub" class="mt-5 text-[15px] text-white/40 max-w-[400px] mx-auto leading-relaxed">
         Từ nền tảng kiến thức đến tư vấn cá nhân — mỗi cấp độ là một bước tiến trong hành trình tài chính của bạn.
       </p>
     </div>
@@ -91,25 +91,26 @@ const plans = [
             </span>
           )}
 
-          <div class="font-mono text-[11px] tracking-[0.3em] uppercase text-gold mb-2">{plan.name}</div>
-          <p class="text-[12px] text-white/40 leading-relaxed mb-6">{plan.subtitle}</p>
+          <div data-i18n={`plan.${i}.name`} class="font-mono text-[11px] tracking-[0.3em] uppercase text-gold mb-2">{plan.name}</div>
+          <p data-i18n={`plan.${i}.subtitle`} class="text-[12px] text-white/40 leading-relaxed mb-6">{plan.subtitle}</p>
 
           <div class="font-serif text-[38px] md:text-[44px] font-black leading-none text-white mb-1">
             {plan.price}
           </div>
-          <div class="text-[12px] text-white/40 mb-8">{plan.period}</div>
+          <div data-i18n={`plan.${i}.period`} class="text-[12px] text-white/40 mb-8">{plan.period}</div>
 
           <ul class="flex flex-col gap-3.5 mb-8 flex-1">
-            {plan.features.map((f) => (
+            {plan.features.map((f, j) => (
               <li class="flex items-start gap-3 text-[13px] text-white/75 leading-snug">
                 <span class="text-gold text-[8px] mt-1.5 flex-shrink-0">◆</span>
-                {f}
+                <span data-i18n={`plan.${i}.f${j}`}>{f}</span>
               </li>
             ))}
           </ul>
 
           <a
             href={plan.ctaHref ?? '#contact'}
+            data-i18n={`plan.${i}.cta`}
             class={[
               'block w-full py-3.5 text-center text-[12px] font-semibold tracking-[0.15em] uppercase no-underline transition-all duration-300',
               plan.featured

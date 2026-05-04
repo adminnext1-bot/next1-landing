@@ -4,36 +4,42 @@ const pillars = [
     num: '01',
     titleAccent: 'EA ',
     titleRest: 'Trading',
+    descKey: 'pillars.p1.desc',
     desc: 'Hệ thống giao dịch tự động với quản lý vốn chặt chẽ. Lợi nhuận ổn định, không cờ bạc "all-in".',
   },
   {
     num: '02',
     titleAccent: 'Weekly',
     titleRest: ' Analysis',
+    descKey: 'pillars.p2.desc',
     desc: 'Phân tích thị trường chuyên sâu hàng tuần. Định hướng rõ ràng cho mọi trader. Tránh giao dịch cảm tính.',
   },
   {
     num: '03',
     titleAccent: 'Education',
     titleRest: ' System',
+    descKey: 'pillars.p3.desc',
     desc: 'Nội dung chất lượng trên Facebook, YouTube, TikTok. Từ cơ bản đến nâng cao theo lộ trình rõ ràng.',
   },
   {
     num: '04',
     titleAccent: 'Training',
     titleRest: ' & Team',
+    descKey: 'pillars.p4.desc',
     desc: 'Đào tạo trader mới. Hướng dẫn xây dựng đội nhóm chuyên nghiệp. Phát triển kỹ năng lãnh đạo và hệ thống.',
   },
   {
     num: '05',
     titleAccent: 'Strategic',
     titleRest: ' Partnerships',
+    descKey: 'pillars.p5.desc',
     desc: 'Kết nối với broker và nền tảng giao dịch uy tín dựa trên kinh nghiệm thực tế. Giảm rủi ro cho người mới.',
   },
   {
     num: '06',
     titleAccent: 'Events',
     titleRest: ' & Engagement',
+    descKey: 'pillars.p6.desc',
     desc: 'Workshop, Webinar, Seminar offline. Biến kiến thức thành trải nghiệm thực tế, không chỉ lý thuyết.',
   },
 ];
@@ -45,12 +51,12 @@ const pillars = [
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-16 md:mb-20 reveal">
       <div>
-        <span class="section-label mb-4">// 02 — Dịch vụ</span>
-        <h2 class="section-title">
+        <span data-i18n="pillars.label" class="section-label mb-4">// 02 — Dịch vụ</span>
+        <h2 data-i18n-html="pillars.h2" class="section-title">
           6 Trụ cột<br /><span class="text-gold italic font-normal">hoạt động</span>
         </h2>
       </div>
-      <p class="mt-6 md:mt-0 text-sm text-white/40 md:max-w-[260px] md:text-right leading-relaxed">
+      <p data-i18n="pillars.sub" class="mt-6 md:mt-0 text-sm text-white/40 md:max-w-[260px] md:text-right leading-relaxed">
         Từ tự động hoá đến giáo dục, từ phân tích đến xây dựng đội nhóm.
       </p>
     </div>
@@ -80,7 +86,7 @@ const pillars = [
             <span class="text-gold">{p.titleAccent}</span>{p.titleRest}
           </div>
 
-          <p class="text-[14px] text-white/40 leading-[1.7]">{p.desc}</p>
+          <p data-i18n={p.descKey} class="text-[14px] text-white/40 leading-[1.7]">{p.desc}</p>
         </div>
       ))}
     </div>

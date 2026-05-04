@@ -1,4 +1,7 @@
 ---
+import { ui } from '../i18n/ui';
+const translations = ui;
+
 export interface Props {
   title?: string;
   description?: string;
@@ -54,6 +57,60 @@ const canonicalURL = new URL(Astro.url.pathname, SITE_URL);
   </head>
   <body>
     <slot />
+
+    <!-- i18n engine -->
+    <script define:vars={{ translations }}>
+      const LANG_KEY = 'next1-lang';
+
+      function getLang() {
+        return localStorage.getItem(LANG_KEY) || 'vi';
+      }
+
+      function t(key, lang) {
+        return translations[lang]?.[key] ?? translations['vi'][key] ?? key;
+      }
+
+      function applyLang(lang) {
+        localStorage.setItem(LANG_KEY, lang);
+        document.documentElement.lang = lang === 'en' ? 'en' : 'vi';
+
+        // Plain text swap
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const val = t(el.dataset.i18n, lang);
+          if (val) el.textContent = val;
+        });
+
+        // HTML swap (for elements with inner spans/tags)
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+          const val = t(el.dataset.i18nHtml, lang);
+          if (val) el.innerHTML = val;
+        });
+
+        // Placeholder swap
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+          const val = t(el.dataset.i18nPh, lang);
+          if (val) el.placeholder = val;
+        });
+
+        // Toggle button label
+        document.querySelectorAll('[data-lang-toggle]').forEach(btn => {
+          btn.textContent = lang === 'vi' ? 'EN' : 'VI';
+        });
+      }
+
+      // Apply on load
+      const savedLang = getLang();
+      if (savedLang === 'en') applyLang('en');
+
+      // Wire toggle buttons
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-lang-toggle]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            applyLang(getLang() === 'vi' ? 'en' : 'vi');
+          });
+        });
+      });
+    </script>
 
     <script>
       // Scroll-reveal via IntersectionObserver

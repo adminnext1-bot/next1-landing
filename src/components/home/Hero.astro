@@ -1,8 +1,8 @@
 ---
 const stats = [
-  { num: '500+', label: 'Thành viên' },
-  { num: '5',    label: 'Thị trường' },
-  { num: '10',   label: 'Năm kinh nghiệm' },
+  { num: '500+', label: 'Thành viên', key: 'hero.stat1' },
+  { num: '5',    label: 'Thị trường', key: 'hero.stat2' },
+  { num: '10',   label: 'Năm kinh nghiệm', key: 'hero.stat3' },
 ];
 ---
 
@@ -32,11 +32,12 @@ const stats = [
              opacity-0 animate-[fadeUp_0.8s_0.2s_ease_forwards]
              [animation-fill-mode:both] inline-flex items-center gap-2"
     >
-      <span class="text-gold-dark mx-2 md:mx-3">──</span>Cộng đồng · Vietnam · SEA<span class="text-gold-dark mx-2 md:mx-3">──</span>
+      <span class="text-gold-dark mx-2 md:mx-3">──</span><span data-i18n="hero.eyebrow">Cộng đồng · Vietnam · SEA</span><span class="text-gold-dark mx-2 md:mx-3">──</span>
     </span>
 
     <!-- Headline -->
     <h1
+      data-i18n-html="hero.headline"
       class="font-serif font-black leading-[0.92] tracking-tight
              text-[clamp(44px,8.5vw,110px)]
              opacity-0 animate-[fadeUp_0.9s_0.4s_ease_forwards]"
@@ -48,6 +49,7 @@ const stats = [
 
     <!-- Sub -->
     <p
+      data-i18n="hero.sub"
       class="mt-7 text-base md:text-lg font-light text-white/75 max-w-[540px] leading-relaxed
              opacity-0 animate-[fadeUp_0.9s_0.6s_ease_forwards]"
     >
@@ -62,6 +64,7 @@ const stats = [
     >
       <a
         href="#membership"
+        data-i18n="hero.cta1"
         class="px-7 md:px-10 py-3.5 md:py-4 bg-gold text-ink text-[13px] font-semibold tracking-[0.12em] uppercase
                no-underline transition-all duration-300
                hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(201,168,76,0.35)]"
@@ -70,6 +73,7 @@ const stats = [
       </a>
       <a
         href="#about"
+        data-i18n="hero.cta2"
         class="px-7 md:px-10 py-3.5 md:py-4 border border-white/40 text-white/80 text-[13px] font-normal tracking-[0.12em] uppercase
                no-underline transition-all duration-300 hover:border-gold hover:text-gold"
       >
@@ -90,7 +94,7 @@ const stats = [
         {i > 0 && <div class="w-px h-12 bg-white/10 hidden md:block self-center"></div>}
         <div class="text-center md:flex-1">
           <span class="font-serif text-[32px] md:text-[44px] font-bold text-gold leading-none block">{s.num}</span>
-          <span class="text-[10px] tracking-[0.2em] uppercase text-white/40 mt-1 block">{s.label}</span>
+          <span data-i18n={s.key} class="text-[10px] tracking-[0.2em] uppercase text-white/40 mt-1 block">{s.label}</span>
         </div>
       </>
     ))}
