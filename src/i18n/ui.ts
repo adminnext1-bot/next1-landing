@@ -122,7 +122,7 @@ export const ui: Record<Lang, Record<string, string>> = {
     'nav.join': 'Join Now',
     // Hero
     'hero.eyebrow': 'Community · Vietnam · SEA',
-    'hero.headline': 'Know.<br /><span class="text-gold">Invest.</span><br /><span class="italic font-normal">Prosper.</span>',
+    'hero.headline': 'Understand.<br /><span class="text-gold">Invest.</span><br /><span class="italic font-normal">Prosper.</span>',
     'hero.sub': "The investment & trading ecosystem for Vietnam's new generation — disciplined, systematic, driven by logic, not emotion.",
     'hero.cta1': 'Join the Community',
     'hero.cta2': 'Learn More',
